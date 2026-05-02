@@ -1,0 +1,62 @@
+{
+  "name": "propline-cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for the PropLine player props betting odds API. Wraps the propline SDK with pretty-printed tables and JSON output.",
+  "keywords": [
+    "cli",
+    "sports",
+    "betting",
+    "odds",
+    "player-props",
+    "api",
+    "sportsbook",
+    "mlb",
+    "nba",
+    "nhl",
+    "nfl",
+    "soccer",
+    "ufc",
+    "bovada",
+    "draftkings",
+    "fanduel",
+    "pinnacle",
+    "prizepicks"
+  ],
+  "homepage": "https://prop-line.com",
+  "bugs": "https://github.com/proplineapi/propline-cli/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/proplineapi/propline-cli.git"
+  },
+  "license": "MIT",
+  "author": "PropLine <support@prop-line.com>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "propline": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "propline": "^0.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.39",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0"
+  }
+}
