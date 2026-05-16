@@ -201,6 +201,31 @@ export function cmdScores(
   });
 }
 
+/* ── resolution-summary ──────────────────────────────────────────────── */
+
+export function cmdResolutionSummary(
+  flags: CommonFlags & { days?: number },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const s = await client.getResolutionSummary(flags.days ?? 30);
+    if (flags.json) return printJson(s);
+    process.stdout.write(
+      `${s.total_graded.toLocaleString()} props graded ` +
+        `(${s.total_settled.toLocaleString()} settled) across ` +
+        `${s.sports_covered} sports / ${s.events_graded.toLocaleString()} ` +
+        `games — last ${s.days}d\n\n`,
+    );
+    const cols: Column<(typeof s.by_sport)[number]>[] = [
+      { label: "SPORT", value: (r) => r.title },
+      { label: "KEY", value: (r) => r.sport_key },
+      { label: "GRADED", value: (r) => r.graded.toLocaleString(), numeric: true },
+      { label: "GAMES", value: (r) => String(r.events), numeric: true },
+    ];
+    printTable(s.by_sport, cols);
+  });
+}
+
 /* ── live (cross-sport in-progress games) ────────────────────────────── */
 
 const LIVE_SPORTS = [

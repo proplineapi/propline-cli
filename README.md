@@ -57,6 +57,7 @@ propline webhooks deliveries 42
 | `propline events <sport>` | List upcoming events for a sport |
 | `propline odds <sport> [event_id]` | Bulk odds (no event_id) or per-event (with) |
 | `propline scores <sport>` | Recent scores + status |
+| `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
 | `propline player-history <sport> <player>` | Recent prop history for a player on a market |

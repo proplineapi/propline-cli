@@ -9,6 +9,7 @@ import {
   cmdEvents,
   cmdOdds,
   cmdScores,
+  cmdResolutionSummary,
   cmdLive,
   cmdEv,
   cmdPlayerHistory,
@@ -20,7 +21,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.1.2";
+export const VERSION = "0.2.0";
 
 const program = new Command();
 
@@ -107,6 +108,20 @@ program
   .description("Get game scores and status")
   .action(function (this: Command, sport: string) {
     return cmdScores(sport, gather(this));
+  });
+
+/* ── resolution-summary ──────────────────────────────────────────────── */
+
+program
+  .command("resolution-summary")
+  .option(
+    "-d, --days <n>",
+    "look-back window, 1-90 (default 30)",
+    (v) => parseInt(v, 10),
+  )
+  .description("Graded-prop volume + per-sport breakdown (free)")
+  .action(function (this: Command) {
+    return cmdResolutionSummary(gather(this));
   });
 
 /* ── live ───────────────────────────────────────────────────────────── */
