@@ -9,6 +9,7 @@ import {
   cmdEvents,
   cmdOdds,
   cmdScores,
+  cmdGrandSalami,
   cmdResolutionSummary,
   cmdLive,
   cmdEv,
@@ -21,7 +22,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.2.0";
+export const VERSION = "0.3.0";
 
 const program = new Command();
 
@@ -108,6 +109,19 @@ program
   .description("Get game scores and status")
   .action(function (this: Command, sport: string) {
     return cmdScores(sport, gather(this));
+  });
+
+/* ── grand-salami ────────────────────────────────────────────────────── */
+
+program
+  .command("grand-salami")
+  .option(
+    "--date <YYYY-MM-DD>",
+    "UTC date (defaults to today)",
+  )
+  .description("MLB synthetic Grand Salami — total runs + per-book line")
+  .action(function (this: Command) {
+    return cmdGrandSalami(gather(this));
   });
 
 /* ── resolution-summary ──────────────────────────────────────────────── */

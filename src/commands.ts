@@ -201,6 +201,33 @@ export function cmdScores(
   });
 }
 
+/* ── grand-salami ────────────────────────────────────────────────────── */
+
+export function cmdGrandSalami(
+  flags: CommonFlags & { date?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const gs = await client.getMlbGrandSalami({ date: flags.date });
+    if (flags.json) return printJson(gs);
+    process.stdout.write(
+      `MLB Grand Salami — ${gs.date} (UTC)\n` +
+        `${gs.games_total} games · ${gs.games_completed} final · ` +
+        `${gs.games_in_progress} live · ${gs.games_upcoming} upcoming\n` +
+        (gs.actual_total_runs === null
+          ? `Actual total: pending\n\n`
+          : `Actual total: ${gs.actual_total_runs} runs\n\n`),
+    );
+    const cols: Column<(typeof gs.bookmakers)[number]>[] = [
+      { label: "BOOK", value: (r) => r.title },
+      { label: "GAMES", value: (r) => String(r.games_priced), numeric: true },
+      { label: "LINE", value: (r) => r.line.toFixed(1), numeric: true },
+      { label: "RESULT", value: (r) => r.result ?? "" },
+    ];
+    printTable(gs.bookmakers, cols);
+  });
+}
+
 /* ── resolution-summary ──────────────────────────────────────────────── */
 
 export function cmdResolutionSummary(
