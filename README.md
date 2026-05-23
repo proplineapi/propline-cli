@@ -56,6 +56,8 @@ propline webhooks deliveries 42
 | `propline sports` | List available sports |
 | `propline events <sport>` | List upcoming events for a sport |
 | `propline odds <sport> [event_id]` | Bulk odds (no event_id) or per-event (with) |
+| `propline history <sport> <event_id>` | Historical line movement; supports `--from`/`--to`, `--relative-from`/`--relative-to`, `--interval`, `--changes-only` (Hobby+) |
+| `propline closing <sport> <event_id>` | Closing line per (book, market, outcome) — CLV helper (Hobby+) |
 | `propline scores <sport>` | Recent scores + status |
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
 | `propline live` | Every in-progress game across the major sports |

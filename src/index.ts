@@ -15,6 +15,8 @@ import {
   cmdEv,
   cmdPlayerHistory,
   cmdExportResolvedProps,
+  cmdHistory,
+  cmdClosing,
   cmdWebhooksList,
   cmdWebhooksCreate,
   cmdWebhooksDelete,
@@ -22,7 +24,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.3.0";
+export const VERSION = "0.4.0";
 
 const program = new Command();
 
@@ -164,6 +166,45 @@ program
   .description("Cross-book +EV against a sharp no-vig fair line (Pro tier)")
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdEv(sport, eventId, gather(this));
+  });
+
+/* ── history ────────────────────────────────────────────────────────── */
+
+program
+  .command("history")
+  .argument("<sport>", "sport key")
+  .argument("<event_id>", "event id")
+  .option("-m, --markets <list>", "comma-separated market keys (default h2h,spreads,totals)")
+  .option("--from <iso>", "ISO timestamp; only include snapshots at or after")
+  .option("--to <iso>", "ISO timestamp; only include snapshots at or before")
+  .option(
+    "--relative-from <offset>",
+    "offset relative to commence_time, e.g. -3h, -30m, -90s",
+  )
+  .option(
+    "--relative-to <offset>",
+    "offset relative to commence_time, e.g. -1m, 0",
+  )
+  .option(
+    "--interval <bucket>",
+    "downsample to one snapshot per bucket: 30s|1m|5m|15m|30m|1h",
+  )
+  .option("--changes-only", "drop snapshots whose (price, point) match the previous one", false)
+  .description("Historical line movement for an event with period filters (Hobby+)")
+  .action(function (this: Command, sport: string, eventId: string) {
+    return cmdHistory(sport, eventId, gather(this) as never);
+  });
+
+/* ── closing ────────────────────────────────────────────────────────── */
+
+program
+  .command("closing")
+  .argument("<sport>", "sport key")
+  .argument("<event_id>", "event id")
+  .option("-m, --markets <list>", "comma-separated market keys (default h2h,spreads,totals)")
+  .description("Closing line per (book, market, outcome) — CLV helper (Hobby+)")
+  .action(function (this: Command, sport: string, eventId: string) {
+    return cmdClosing(sport, eventId, gather(this) as never);
   });
 
 /* ── player-history ─────────────────────────────────────────────────── */

@@ -601,6 +601,146 @@ export function cmdWebhooksDeliveries(
   });
 }
 
+/* ── history ────────────────────────────────────────────────────────── */
+
+export function cmdHistory(
+  sport: string,
+  eventId: string,
+  flags: CommonFlags & {
+    markets?: string;
+    from?: string;
+    to?: string;
+    relativeFrom?: string;
+    relativeTo?: string;
+    interval?: string;
+    changesOnly?: boolean;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const markets = parseMarketsFlag(flags.markets);
+    const hist = await client.getOddsHistory(sport, eventId, {
+      markets,
+      from: flags.from,
+      to: flags.to,
+      relativeFrom: flags.relativeFrom,
+      relativeTo: flags.relativeTo,
+      interval: flags.interval as
+        | "30s"
+        | "1m"
+        | "5m"
+        | "15m"
+        | "30m"
+        | "1h"
+        | undefined,
+      changesOnly: flags.changesOnly,
+    });
+    if (flags.json) return printJson(hist);
+    type Row = {
+      book: string;
+      market: string;
+      player: string;
+      side: string;
+      when: string;
+      point: string;
+      price: string;
+    };
+    const rows: Row[] = [];
+    for (const book of hist.bookmakers ?? []) {
+      for (const m of book.markets ?? []) {
+        for (const o of m.outcomes ?? []) {
+          for (const s of o.snapshots ?? []) {
+            rows.push({
+              book: book.title ?? book.key,
+              market: m.key,
+              player: o.description ?? "",
+              side: o.name,
+              when: formatTime(s.recorded_at),
+              point: formatPoint(s.point ?? null),
+              price: formatPrice(s.price),
+            });
+          }
+        }
+      }
+    }
+    if (rows.length === 0) {
+      process.stdout.write(
+        `(no snapshots returned — check tier access and the time window)\n`,
+      );
+      return;
+    }
+    const cols: Column<Row>[] = [
+      { label: "BOOK", value: (r) => r.book },
+      { label: "MARKET", value: (r) => r.market },
+      { label: "PLAYER", value: (r) => truncate(r.player, 24) },
+      { label: "SIDE", value: (r) => r.side },
+      { label: "WHEN", value: (r) => r.when },
+      { label: "LINE", value: (r) => r.point, numeric: true },
+      { label: "PRICE", value: (r) => r.price, numeric: true },
+    ];
+    printTable(rows, cols);
+  });
+}
+
+/* ── closing ────────────────────────────────────────────────────────── */
+
+export function cmdClosing(
+  sport: string,
+  eventId: string,
+  flags: CommonFlags & { markets?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const markets = parseMarketsFlag(flags.markets);
+    const closing = await client.getOddsClosing(sport, eventId, { markets });
+    if (flags.json) return printJson(closing);
+    type Row = {
+      book: string;
+      market: string;
+      player: string;
+      side: string;
+      closingAt: string;
+      point: string;
+      price: string;
+    };
+    const rows: Row[] = [];
+    for (const book of closing.bookmakers ?? []) {
+      for (const m of book.markets ?? []) {
+        for (const o of m.outcomes ?? []) {
+          rows.push({
+            book: book.title ?? book.key,
+            market: m.key,
+            player: o.description ?? "",
+            side: o.name,
+            closingAt: o.closing_at ? formatTime(o.closing_at) : "",
+            point: formatPoint(o.point ?? null),
+            price: o.price === null ? "" : formatPrice(o.price),
+          });
+        }
+      }
+    }
+    if (rows.length === 0) {
+      process.stdout.write(
+        `(no closing lines returned — check tier access; free tier sees redacted structure)\n`,
+      );
+      return;
+    }
+    process.stdout.write(
+      `${closing.away_team} @ ${closing.home_team} (event ${closing.id})\n`,
+    );
+    const cols: Column<Row>[] = [
+      { label: "BOOK", value: (r) => r.book },
+      { label: "MARKET", value: (r) => r.market },
+      { label: "PLAYER", value: (r) => truncate(r.player, 24) },
+      { label: "SIDE", value: (r) => r.side },
+      { label: "CLOSED AT", value: (r) => r.closingAt },
+      { label: "LINE", value: (r) => r.point, numeric: true },
+      { label: "PRICE", value: (r) => r.price, numeric: true },
+    ];
+    printTable(rows, cols);
+  });
+}
+
 /* ── helpers ────────────────────────────────────────────────────────── */
 
 function parseMarketsFlag(value: string | undefined): string[] | undefined {
