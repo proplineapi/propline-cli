@@ -38,7 +38,16 @@ jobs:
             exit 1
           fi
 
-      - run: npm ci || npm install
+      # npm 11.6+ defaults `minimum-release-age=7d` (supply-chain
+       # defense — blocks installs of packages published in the last
+       # 7 days). That breaks us at every release because the CLI
+       # depends on `propline` (our own Node SDK), and the two
+       # publish in lockstep: the SDK tag pushes first, then the CLI
+       # tag pushes minutes later, so the SDK is always <7 days old.
+       # Override here for the install only; `npm audit
+       # --audit-level=high` below is the actual supply-chain
+       # control.
+      - run: npm ci --minimum-release-age=0 || npm install --minimum-release-age=0
       # Block publish if any direct or transitive dep has a known
       # high/critical CVE. Catches the auto-bump → poisoned-version
       # path even when our cooldown has expired.
