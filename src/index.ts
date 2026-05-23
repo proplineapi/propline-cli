@@ -24,7 +24,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.4.0";
+export const VERSION = "0.5.0";
 
 const program = new Command();
 
@@ -92,6 +92,10 @@ program
   .option(
     "-m, --markets <list>",
     "comma-separated market keys (e.g. h2h,spreads,totals or player_points)",
+  )
+  .option(
+    "-p, --period <codes>",
+    "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",
   )
   .description("Get current odds across all books")
   .action(function (this: Command, sport: string, eventId: string | undefined) {
@@ -190,6 +194,10 @@ program
     "downsample to one snapshot per bucket: 30s|1m|5m|15m|30m|1h",
   )
   .option("--changes-only", "drop snapshots whose (price, point) match the previous one", false)
+  .option(
+    "-p, --period <codes>",
+    "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",
+  )
   .description("Historical line movement for an event with period filters (Hobby+)")
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdHistory(sport, eventId, gather(this) as never);
@@ -202,6 +210,10 @@ program
   .argument("<sport>", "sport key")
   .argument("<event_id>", "event id")
   .option("-m, --markets <list>", "comma-separated market keys (default h2h,spreads,totals)")
+  .option(
+    "-p, --period <codes>",
+    "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",
+  )
   .description("Closing line per (book, market, outcome) — CLV helper (Hobby+)")
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdClosing(sport, eventId, gather(this) as never);

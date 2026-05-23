@@ -58,20 +58,21 @@ export function cmdEvents(sport: string, flags: CommonFlags): Promise<void> {
 export function cmdOdds(
   sport: string,
   eventId: string | undefined,
-  flags: CommonFlags & { markets?: string },
+  flags: CommonFlags & { markets?: string; period?: string },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const markets = parseMarketsFlag(flags.markets);
+    const period = flags.period;
 
     if (eventId) {
-      const resp = await client.getOdds(sport, { eventId, markets });
+      const resp = await client.getOdds(sport, { eventId, markets, period });
       if (flags.json) return printJson(resp);
       printOddsResponse(resp);
       return;
     }
 
-    const resp = await client.getOdds(sport, { markets });
+    const resp = await client.getOdds(sport, { markets, period });
     if (flags.json) return printJson(resp);
     // Bulk: one row per (event, book, market, outcome) gets dense fast.
     // Collapse to a per-event summary row showing how many books / markets
@@ -614,6 +615,7 @@ export function cmdHistory(
     relativeTo?: string;
     interval?: string;
     changesOnly?: boolean;
+    period?: string;
   },
 ): Promise<void> {
   return runCommand(async () => {
@@ -634,6 +636,7 @@ export function cmdHistory(
         | "1h"
         | undefined,
       changesOnly: flags.changesOnly,
+      period: flags.period,
     });
     if (flags.json) return printJson(hist);
     type Row = {
@@ -687,12 +690,12 @@ export function cmdHistory(
 export function cmdClosing(
   sport: string,
   eventId: string,
-  flags: CommonFlags & { markets?: string },
+  flags: CommonFlags & { markets?: string; period?: string },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const markets = parseMarketsFlag(flags.markets);
-    const closing = await client.getOddsClosing(sport, eventId, { markets });
+    const closing = await client.getOddsClosing(sport, eventId, { markets, period: flags.period });
     if (flags.json) return printJson(closing);
     type Row = {
       book: string;
