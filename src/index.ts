@@ -10,6 +10,7 @@ import {
   cmdOdds,
   cmdScores,
   cmdGrandSalami,
+  cmdDailyGoalsTotal,
   cmdResolutionSummary,
   cmdLive,
   cmdEv,
@@ -24,7 +25,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.5.1";
+export const VERSION = "0.6.0";
 
 const program = new Command();
 
@@ -128,6 +129,19 @@ program
   .description("MLB synthetic Grand Salami — total runs + per-book line")
   .action(function (this: Command) {
     return cmdGrandSalami(gather(this));
+  });
+
+/* ── daily-goals-total ───────────────────────────────────────────────── */
+
+program
+  .command("daily-goals-total")
+  .option(
+    "--date <YYYY-MM-DD>",
+    "UTC date (defaults to today)",
+  )
+  .description("NHL synthetic Daily Goals Total — total goals + per-book line")
+  .action(function (this: Command) {
+    return cmdDailyGoalsTotal(gather(this));
   });
 
 /* ── resolution-summary ──────────────────────────────────────────────── */

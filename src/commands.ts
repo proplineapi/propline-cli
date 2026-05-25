@@ -229,6 +229,33 @@ export function cmdGrandSalami(
   });
 }
 
+/* ── daily-goals-total ───────────────────────────────────────────────── */
+
+export function cmdDailyGoalsTotal(
+  flags: CommonFlags & { date?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const dgt = await client.getNhlDailyGoalsTotal({ date: flags.date });
+    if (flags.json) return printJson(dgt);
+    process.stdout.write(
+      `NHL Daily Goals Total — ${dgt.date} (UTC)\n` +
+        `${dgt.games_total} games · ${dgt.games_completed} final · ` +
+        `${dgt.games_in_progress} live · ${dgt.games_upcoming} upcoming\n` +
+        (dgt.actual_total_goals === null
+          ? `Actual total: pending\n\n`
+          : `Actual total: ${dgt.actual_total_goals} goals\n\n`),
+    );
+    const cols: Column<(typeof dgt.bookmakers)[number]>[] = [
+      { label: "BOOK", value: (r) => r.title },
+      { label: "GAMES", value: (r) => String(r.games_priced), numeric: true },
+      { label: "LINE", value: (r) => r.line.toFixed(1), numeric: true },
+      { label: "RESULT", value: (r) => r.result ?? "" },
+    ];
+    printTable(dgt.bookmakers, cols);
+  });
+}
+
 /* ── resolution-summary ──────────────────────────────────────────────── */
 
 export function cmdResolutionSummary(
