@@ -4,7 +4,7 @@
 // per-call state — so future ones can be added without touching the
 // existing surface.
 
-import type { PropLine } from "propline";
+import type { PropLine, PlayerMarketTrend, HitRateSplit } from "propline";
 import { buildClient, runCommand, type ClientFlags } from "./client.js";
 import {
   printJson,
@@ -471,50 +471,7 @@ export function cmdPlayerHistory(
 
 /* ── player-trends ──────────────────────────────────────────────────── */
 
-// Local shape of the /trends response + the SDK method signature. The
-// `propline` SDK gains `getPlayerTrends(sport, player, opts?)` — until that
-// version is published these mirror the documented contract so the command
-// compiles + runs against the live endpoint the moment the SDK lands.
-interface TrendWindow {
-  over: number | null;
-  under: number | null;
-  push: number | null;
-  over_pct: number | null;
-}
-interface TrendStreak {
-  result: string | null;
-  length: number | null;
-}
-interface TrendMarket {
-  market: string;
-  games_graded: number | null;
-  recent_line: number | null;
-  avg_actual: number | null;
-  last_5: TrendWindow | null;
-  last_10: TrendWindow | null;
-  last_20: TrendWindow | null;
-  last_50: TrendWindow | null;
-  current_streak: TrendStreak | null;
-  redacted: boolean;
-}
-interface PlayerTrendsResponse {
-  player_name: string;
-  sport_key: string;
-  markets: TrendMarket[];
-  upgrade_url: string | null;
-}
-interface GetPlayerTrendsOptions {
-  market?: string;
-}
-type PlayerTrendsClient = PropLine & {
-  getPlayerTrends(
-    sport: string,
-    playerName: string,
-    options?: GetPlayerTrendsOptions,
-  ): Promise<PlayerTrendsResponse>;
-};
-
-function formatOverPct(w: TrendWindow | null): string {
+function formatOverPct(w: HitRateSplit | null): string {
   if (!w || w.over_pct === null || w.over_pct === undefined) return "";
   return `${w.over_pct.toFixed(0)}%`;
 }
@@ -527,9 +484,7 @@ export function cmdPlayerTrends(
   },
 ): Promise<void> {
   return runCommand(async () => {
-    // The SDK type ships in a later `propline` release; cast keeps the
-    // call site identical to every other command (`client.getPlayerTrends`).
-    const client = buildClient(flags) as PlayerTrendsClient;
+    const client = buildClient(flags);
     const resp = await client.getPlayerTrends(sport, player, {
       market: flags.market,
     });
@@ -537,11 +492,11 @@ export function cmdPlayerTrends(
     process.stdout.write(
       `${resp.player_name} · ${resp.sport_key} (${resp.markets.length} markets)\n`,
     );
-    const cols: Column<TrendMarket>[] = [
+    const cols: Column<PlayerMarketTrend>[] = [
       { label: "MARKET", value: (r) => r.market },
       {
         label: "GAMES",
-        value: (r) => (r.games_graded === null ? "" : String(r.games_graded)),
+        value: (r) => String(r.games_graded),
         numeric: true,
       },
       { label: "LINE", value: (r) => formatPoint(r.recent_line), numeric: true },
@@ -560,7 +515,7 @@ export function cmdPlayerTrends(
         label: "STREAK",
         value: (r) => {
           const s = r.current_streak;
-          if (!s || s.result === null || s.length === null) return "";
+          if (!s) return "";
           return `${s.length}× ${s.result}`;
         },
       },
