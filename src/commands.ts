@@ -469,6 +469,106 @@ export function cmdPlayerHistory(
   });
 }
 
+/* ── player-trends ──────────────────────────────────────────────────── */
+
+// Local shape of the /trends response + the SDK method signature. The
+// `propline` SDK gains `getPlayerTrends(sport, player, opts?)` — until that
+// version is published these mirror the documented contract so the command
+// compiles + runs against the live endpoint the moment the SDK lands.
+interface TrendWindow {
+  over: number | null;
+  under: number | null;
+  push: number | null;
+  over_pct: number | null;
+}
+interface TrendStreak {
+  result: string | null;
+  length: number | null;
+}
+interface TrendMarket {
+  market: string;
+  games_graded: number | null;
+  recent_line: number | null;
+  avg_actual: number | null;
+  last_5: TrendWindow | null;
+  last_10: TrendWindow | null;
+  last_20: TrendWindow | null;
+  last_50: TrendWindow | null;
+  current_streak: TrendStreak | null;
+  redacted: boolean;
+}
+interface PlayerTrendsResponse {
+  player_name: string;
+  sport_key: string;
+  markets: TrendMarket[];
+  upgrade_url: string | null;
+}
+interface GetPlayerTrendsOptions {
+  market?: string;
+}
+type PlayerTrendsClient = PropLine & {
+  getPlayerTrends(
+    sport: string,
+    playerName: string,
+    options?: GetPlayerTrendsOptions,
+  ): Promise<PlayerTrendsResponse>;
+};
+
+function formatOverPct(w: TrendWindow | null): string {
+  if (!w || w.over_pct === null || w.over_pct === undefined) return "";
+  return `${w.over_pct.toFixed(0)}%`;
+}
+
+export function cmdPlayerTrends(
+  sport: string,
+  player: string,
+  flags: CommonFlags & {
+    market?: string;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    // The SDK type ships in a later `propline` release; cast keeps the
+    // call site identical to every other command (`client.getPlayerTrends`).
+    const client = buildClient(flags) as PlayerTrendsClient;
+    const resp = await client.getPlayerTrends(sport, player, {
+      market: flags.market,
+    });
+    if (flags.json) return printJson(resp);
+    process.stdout.write(
+      `${resp.player_name} · ${resp.sport_key} (${resp.markets.length} markets)\n`,
+    );
+    const cols: Column<TrendMarket>[] = [
+      { label: "MARKET", value: (r) => r.market },
+      {
+        label: "GAMES",
+        value: (r) => (r.games_graded === null ? "" : String(r.games_graded)),
+        numeric: true,
+      },
+      { label: "LINE", value: (r) => formatPoint(r.recent_line), numeric: true },
+      {
+        label: "AVG",
+        value: (r) =>
+          r.avg_actual === null || r.avg_actual === undefined
+            ? ""
+            : r.avg_actual.toFixed(2),
+        numeric: true,
+      },
+      { label: "L5 O%", value: (r) => formatOverPct(r.last_5), numeric: true },
+      { label: "L10 O%", value: (r) => formatOverPct(r.last_10), numeric: true },
+      { label: "L20 O%", value: (r) => formatOverPct(r.last_20), numeric: true },
+      {
+        label: "STREAK",
+        value: (r) => {
+          const s = r.current_streak;
+          if (!s || s.result === null || s.length === null) return "";
+          return `${s.length}× ${s.result}`;
+        },
+      },
+    ];
+    printTable(resp.markets, cols);
+  });
+}
+
 /* ── export-resolved-props ──────────────────────────────────────────── */
 
 export function cmdExportResolvedProps(

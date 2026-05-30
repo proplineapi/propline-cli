@@ -15,6 +15,7 @@ import {
   cmdLive,
   cmdEv,
   cmdPlayerHistory,
+  cmdPlayerTrends,
   cmdExportResolvedProps,
   cmdHistory,
   cmdClosing,
@@ -25,7 +26,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.6.0";
+export const VERSION = "0.6.1";
 
 const program = new Command();
 
@@ -250,6 +251,23 @@ program
   .description("Recent prop history for a player on a market (Pro full, Free redacted)")
   .action(function (this: Command, sport: string, player: string) {
     return cmdPlayerHistory(sport, player, gather(this) as never);
+  });
+
+/* ── player-trends ──────────────────────────────────────────────────── */
+
+program
+  .command("player-trends")
+  .argument("<sport>", "sport key")
+  .argument("<player>", 'player name (quote if it contains spaces — e.g. "Aaron Judge")')
+  .option(
+    "-m, --market <key>",
+    "filter to a single market key (e.g. batter_total_bases)",
+  )
+  .description(
+    "Aggregated hit-rate trends per market — L5/L10/L20/L50 over/under splits + current streak (Pro full, Free redacted)",
+  )
+  .action(function (this: Command, sport: string, player: string) {
+    return cmdPlayerTrends(sport, player, gather(this) as never);
   });
 
 /* ── export-resolved-props ──────────────────────────────────────────── */
