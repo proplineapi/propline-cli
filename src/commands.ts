@@ -565,6 +565,46 @@ export function cmdExportResolvedProps(
   });
 }
 
+/* ── export-odds-history ────────────────────────────────────────────── */
+
+export function cmdExportOddsHistory(
+  flags: CommonFlags & {
+    sport: string;
+    market?: string;
+    bookmaker?: string;
+    since?: string;
+    until?: string;
+    out?: string;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    if (flags.out) {
+      const path = await client.exportOddsHistory({
+        sport: flags.sport,
+        market: flags.market,
+        bookmaker: flags.bookmaker,
+        since: flags.since,
+        until: flags.until,
+        outPath: flags.out,
+      });
+      process.stdout.write(`exported → ${path}\n`);
+      return;
+    }
+    // No --out: stream raw CSV bytes to stdout. The API only emits CSV,
+    // so --json is meaningless here and ignored. This dataset is large —
+    // pass --since/--until to page month-by-month.
+    const buf = await client.exportOddsHistory({
+      sport: flags.sport,
+      market: flags.market,
+      bookmaker: flags.bookmaker,
+      since: flags.since,
+      until: flags.until,
+    });
+    process.stdout.write(buf);
+  });
+}
+
 /* ── webhooks ───────────────────────────────────────────────────────── */
 
 export function cmdWebhooksList(flags: CommonFlags): Promise<void> {

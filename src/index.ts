@@ -17,6 +17,7 @@ import {
   cmdPlayerHistory,
   cmdPlayerTrends,
   cmdExportResolvedProps,
+  cmdExportOddsHistory,
   cmdHistory,
   cmdClosing,
   cmdWebhooksList,
@@ -26,7 +27,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.6.1";
+export const VERSION = "0.7.0";
 
 const program = new Command();
 
@@ -286,6 +287,26 @@ program
   .description("Bulk CSV export of resolved props (Pro tier)")
   .action(function (this: Command) {
     return cmdExportResolvedProps(gather(this) as never);
+  });
+
+/* ── export-odds-history ────────────────────────────────────────────── */
+
+program
+  .command("export-odds-history")
+  .requiredOption("--sport <key>", "sport key (required)")
+  .option("--market <key>", "filter by market key")
+  .option("--bookmaker <key>", "filter by bookmaker key")
+  .option("--since <iso>", "ISO datetime lower bound on recorded_at")
+  .option("--until <iso>", "ISO datetime upper bound on recorded_at")
+  .option(
+    "--out <path>",
+    "write CSV to this path (default: stream CSV to stdout)",
+  )
+  .description(
+    "Bulk CSV export of the full line-movement tick history (Backfill pass / Enterprise). Large — page month-by-month with --since/--until.",
+  )
+  .action(function (this: Command) {
+    return cmdExportOddsHistory(gather(this) as never);
   });
 
 /* ── webhooks ───────────────────────────────────────────────────────── */
