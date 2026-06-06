@@ -10,6 +10,7 @@ import {
   cmdOdds,
   cmdScores,
   cmdContext,
+  cmdMovement,
   cmdGrandSalami,
   cmdDailyGoalsTotal,
   cmdResolutionSummary,
@@ -28,7 +29,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.8.0";
+export const VERSION = "0.9.0";
 
 const program = new Command();
 
@@ -132,6 +133,22 @@ program
   )
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdContext(sport, eventId, gather(this));
+  });
+
+/* ── movement ────────────────────────────────────────────────────────── */
+
+program
+  .command("movement")
+  .argument("<sport>", "sport key")
+  .argument("<event_id>", "event id")
+  .option("-m, --markets <list>", "comma-separated market keys (default h2h,spreads,totals)")
+  .option(
+    "-p, --period <codes>",
+    "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",
+  )
+  .description("Line movement + steam detection across books (Hobby+)")
+  .action(function (this: Command, sport: string, eventId: string) {
+    return cmdMovement(sport, eventId, gather(this));
   });
 
 /* ── grand-salami ────────────────────────────────────────────────────── */

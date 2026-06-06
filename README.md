@@ -70,6 +70,7 @@ propline webhooks deliveries 42
 | `propline closing <sport> <event_id>` | Closing line per (book, market, outcome) — CLV helper. `--period` accepted (Hobby+) |
 | `propline scores <sport>` | Recent scores + status |
 | `propline context <sport> <event_id>` | Game conditions a prop settles under — probable pitchers, lineup, home-plate umpire, first-pitch weather (free) |
+| `propline movement <sport> <event_id>` | Line movement + steam detection across books — sharp-money signal (Hobby+) |
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |

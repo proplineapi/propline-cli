@@ -244,6 +244,52 @@ export function cmdContext(
   });
 }
 
+/* ── movement ────────────────────────────────────────────────────────── */
+
+export function cmdMovement(
+  sport: string,
+  eventId: string,
+  flags: CommonFlags & { markets?: string; period?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const mv = await client.getMovement(sport, eventId, {
+      markets: flags.markets ? flags.markets.split(",") : undefined,
+      period: flags.period,
+    });
+    if (flags.json) return printJson(mv);
+
+    process.stdout.write(
+      `${mv.away_team} @ ${mv.home_team} — line movement & steam\n` +
+        `${mv.bookmakers.length} books\n\n`,
+    );
+    if (!mv.steam.length) {
+      process.stdout.write("No steam moves detected.\n");
+      return;
+    }
+    const cols: Column<(typeof mv.steam)[number]>[] = [
+      { label: "MARKET", value: (r) => r.market },
+      {
+        label: "OUTCOME",
+        value: (r) => (r.description ? `${r.name} (${r.description})` : r.name),
+      },
+      { label: "DIR", value: (r) => r.consensus_direction },
+      {
+        label: "BOOKS",
+        value: (r) => `${r.books_moved}/${r.books_quoting}`,
+        numeric: true,
+      },
+      { label: "SCORE", value: (r) => r.steam_score.toFixed(1), numeric: true },
+      {
+        label: "PROBΔ",
+        value: (r) => `${(r.avg_prob_shift * 100).toFixed(1)}%`,
+        numeric: true,
+      },
+    ];
+    printTable(mv.steam, cols);
+  });
+}
+
 /* ── grand-salami ────────────────────────────────────────────────────── */
 
 export function cmdGrandSalami(
