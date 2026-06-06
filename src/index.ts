@@ -29,7 +29,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.9.0";
+export const VERSION = "0.10.0";
 
 const program = new Command();
 
@@ -356,7 +356,7 @@ webhooks
   .requiredOption("--url <url>", "HTTPS endpoint that will receive POSTs")
   .option(
     "--events <list>",
-    "comma-separated event types: line_movement,resolution (default: all)",
+    "comma-separated event types: line_movement,resolution,steam (default: all)",
   )
   .option("--sport <key>", "filter to a single sport")
   .option("--market <key>", "filter to a single market key")
@@ -369,6 +369,11 @@ webhooks
   .option(
     "--min-price-change-pct <n>",
     "minimum % change in American odds to fire a line_movement",
+    (v) => parseFloat(v),
+  )
+  .option(
+    "--min-steam-score <n>",
+    "minimum 0-100 steam score to fire a steam event",
     (v) => parseFloat(v),
   )
   .description("Register a webhook subscription (returns the signing secret ONCE)")
