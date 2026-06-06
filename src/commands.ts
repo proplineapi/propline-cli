@@ -202,6 +202,48 @@ export function cmdScores(
   });
 }
 
+/* ── context ─────────────────────────────────────────────────────────── */
+
+export function cmdContext(
+  sport: string,
+  eventId: string,
+  flags: CommonFlags,
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const ctx = await client.getContext(sport, eventId);
+    if (flags.json) return printJson(ctx);
+
+    const roof = ctx.roof_type ? ` (${ctx.roof_type})` : "";
+    process.stdout.write(
+      `${ctx.away_team} @ ${ctx.home_team}\n` +
+        `${ctx.venue ?? "venue TBD"}${roof} · ${formatTime(ctx.commence_time)}\n\n` +
+        `Probable pitchers : ${ctx.away_probable_pitcher ?? "—"} (away) vs ` +
+        `${ctx.home_probable_pitcher ?? "—"} (home)\n` +
+        `Lineup confirmed  : ${ctx.lineup_confirmed ? "yes" : "no"}\n` +
+        `Home-plate umpire : ${ctx.home_plate_umpire ?? "—"}\n`,
+    );
+    const w = ctx.weather;
+    if (ctx.is_indoor) {
+      process.stdout.write(`Weather           : indoor / climate-controlled\n`);
+    } else if (w) {
+      const parts = [
+        w.temperature_f === null ? null : `${w.temperature_f}°F`,
+        w.wind_speed_mph === null
+          ? null
+          : `wind ${w.wind_speed_mph}mph ${w.wind_direction ?? ""}`.trim(),
+        w.precip_probability_pct === null
+          ? null
+          : `precip ${w.precip_probability_pct}%`,
+        w.conditions ?? null,
+      ].filter(Boolean);
+      process.stdout.write(`Weather           : ${parts.join(" · ")}\n`);
+    } else {
+      process.stdout.write(`Weather           : —\n`);
+    }
+  });
+}
+
 /* ── grand-salami ────────────────────────────────────────────────────── */
 
 export function cmdGrandSalami(

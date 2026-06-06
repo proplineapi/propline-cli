@@ -37,6 +37,9 @@ propline odds basketball_nba 12345 --markets totals --period q1
 # Scores from the last 3 days
 propline scores basketball_nba
 
+# Game context — probable pitchers, umpire, first-pitch weather (free)
+propline context baseball_mlb 12345
+
 # Cross-book +EV plays (Pro tier)
 propline ev baseball_mlb 12345 --plus
 
@@ -66,6 +69,7 @@ propline webhooks deliveries 42
 | `propline history <sport> <event_id>` | Historical line movement; supports `--from`/`--to`, `--relative-from`/`--relative-to`, `--interval`, `--changes-only`, `--period` (Hobby+) |
 | `propline closing <sport> <event_id>` | Closing line per (book, market, outcome) — CLV helper. `--period` accepted (Hobby+) |
 | `propline scores <sport>` | Recent scores + status |
+| `propline context <sport> <event_id>` | Game conditions a prop settles under — probable pitchers, lineup, home-plate umpire, first-pitch weather (free) |
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |

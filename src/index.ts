@@ -9,6 +9,7 @@ import {
   cmdEvents,
   cmdOdds,
   cmdScores,
+  cmdContext,
   cmdGrandSalami,
   cmdDailyGoalsTotal,
   cmdResolutionSummary,
@@ -27,7 +28,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.7.0";
+export const VERSION = "0.8.0";
 
 const program = new Command();
 
@@ -118,6 +119,19 @@ program
   .description("Get game scores and status")
   .action(function (this: Command, sport: string) {
     return cmdScores(sport, gather(this));
+  });
+
+/* ── context ─────────────────────────────────────────────────────────── */
+
+program
+  .command("context")
+  .argument("<sport>", "sport key")
+  .argument("<event_id>", "event id")
+  .description(
+    "Game context an event plays under — probable pitchers, lineup, umpire, weather (free)",
+  )
+  .action(function (this: Command, sport: string, eventId: string) {
+    return cmdContext(sport, eventId, gather(this));
   });
 
 /* ── grand-salami ────────────────────────────────────────────────────── */
