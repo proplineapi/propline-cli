@@ -204,6 +204,13 @@ export function cmdScores(
 
 /* ── context ─────────────────────────────────────────────────────────── */
 
+/** "Paul Skenes (R)" — append the throwing hand when present. `hand` is typed
+ *  loosely so this works whether or not the installed SDK models the field. */
+function fmtPitcher(name: string | null, hand: unknown): string {
+  if (!name) return "—";
+  return typeof hand === "string" && hand ? `${name} (${hand})` : name;
+}
+
 export function cmdContext(
   sport: string,
   eventId: string,
@@ -218,8 +225,8 @@ export function cmdContext(
     process.stdout.write(
       `${ctx.away_team} @ ${ctx.home_team}\n` +
         `${ctx.venue ?? "venue TBD"}${roof} · ${formatTime(ctx.commence_time)}\n\n` +
-        `Probable pitchers : ${ctx.away_probable_pitcher ?? "—"} (away) vs ` +
-        `${ctx.home_probable_pitcher ?? "—"} (home)\n` +
+        `Probable pitchers : ${fmtPitcher(ctx.away_probable_pitcher, ctx.away_probable_pitcher_hand)} (away) vs ` +
+        `${fmtPitcher(ctx.home_probable_pitcher, ctx.home_probable_pitcher_hand)} (home)\n` +
         `Lineup confirmed  : ${ctx.lineup_confirmed ? "yes" : "no"}\n` +
         `Home-plate umpire : ${ctx.home_plate_umpire ?? "—"}\n`,
     );
