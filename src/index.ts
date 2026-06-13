@@ -9,6 +9,7 @@ import {
   cmdEvents,
   cmdOdds,
   cmdScores,
+  cmdFutures,
   cmdContext,
   cmdMovement,
   cmdGrandSalami,
@@ -29,7 +30,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.12.0";
+export const VERSION = "0.13.0";
 
 const program = new Command();
 
@@ -120,6 +121,18 @@ program
   .description("Get game scores and status")
   .action(function (this: Command, sport: string) {
     return cmdScores(sport, gather(this));
+  });
+
+/* ── futures ─────────────────────────────────────────────────────────── */
+
+program
+  .command("futures")
+  .argument("<sport>", "sport key")
+  .description(
+    "Season-long futures — championship/division/conference winners, MVP + awards, season win totals across books (free)",
+  )
+  .action(function (this: Command, sport: string) {
+    return cmdFutures(sport, gather(this));
   });
 
 /* ── context ─────────────────────────────────────────────────────────── */

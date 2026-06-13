@@ -213,6 +213,54 @@ export function cmdScores(
   });
 }
 
+/* ── futures ────────────────────────────────────────────────────────── */
+
+export function cmdFutures(sport: string, flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const futures = await client.getFutures(sport);
+    if (flags.json) return printJson(futures);
+
+    // One row per (futures market, book). The favorite is the
+    // shortest-priced outcome (lowest American number = most favored).
+    interface Row {
+      title: string;
+      market: string;
+      book: string;
+      outcomes: number;
+      favorite: string;
+    }
+    const rows: Row[] = [];
+    for (const ev of futures) {
+      for (const m of ev.markets) {
+        const priced = m.outcomes.filter((o) => o.price !== null);
+        const fav = priced.reduce<(typeof priced)[number] | null>(
+          (best, o) =>
+            best === null || (o.price as number) < (best.price as number)
+              ? o
+              : best,
+          null,
+        );
+        rows.push({
+          title: ev.title,
+          market: m.description,
+          book: m.bookmaker_title || m.bookmaker,
+          outcomes: m.outcomes.length,
+          favorite: fav ? `${fav.name} ${formatPrice(fav.price)}` : "—",
+        });
+      }
+    }
+    const cols: Column<Row>[] = [
+      { label: "FUTURE", value: (r) => truncate(r.title, 32) },
+      { label: "MARKET", value: (r) => truncate(r.market, 30) },
+      { label: "BOOK", value: (r) => r.book },
+      { label: "N", value: (r) => String(r.outcomes), numeric: true },
+      { label: "FAVORITE", value: (r) => r.favorite },
+    ];
+    printTable(rows, cols);
+  });
+}
+
 /* ── context ─────────────────────────────────────────────────────────── */
 
 /** "Paul Skenes (R)" — append the throwing hand when present. `hand` is typed

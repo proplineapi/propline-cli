@@ -69,6 +69,7 @@ propline webhooks deliveries 42
 | `propline history <sport> <event_id>` | Historical line movement; supports `--from`/`--to`, `--relative-from`/`--relative-to`, `--interval`, `--changes-only`, `--period` (Hobby+) |
 | `propline closing <sport> <event_id>` | Closing line per (book, market, outcome) — CLV helper. `--period` accepted (Hobby+) |
 | `propline scores <sport>` | Recent scores + status |
+| `propline futures <sport>` | Season-long futures — championship/division/conference winners, MVP + awards, season win totals across Bovada/FanDuel/DraftKings/Pinnacle (free) |
 | `propline context <sport> <event_id>` | Game conditions a prop settles under — probable pitchers, lineup, home-plate umpire, first-pitch weather (free) |
 | `propline movement <sport> <event_id>` | Line movement + steam detection across books — sharp-money signal (Hobby+) |
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
