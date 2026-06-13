@@ -120,6 +120,7 @@ interface OddsResponseLike {
         description?: string | null;
         price: number;
         point?: number | null;
+        payout_multiplier?: number | null;
       }>;
     }>;
   }>;
@@ -136,11 +137,15 @@ function printOddsResponse(resp: OddsResponseLike): void {
     side: string;
     point: string;
     price: string;
+    mult: string;
   };
   const rows: Row[] = [];
+  let anyMult = false;
   for (const book of resp.bookmakers ?? []) {
     for (const market of book.markets ?? []) {
       for (const o of market.outcomes ?? []) {
+        const m = o.payout_multiplier;
+        if (m !== null && m !== undefined) anyMult = true;
         rows.push({
           book: book.title,
           market: market.key,
@@ -148,6 +153,7 @@ function printOddsResponse(resp: OddsResponseLike): void {
           side: o.name,
           point: formatPoint(o.point ?? null),
           price: formatPrice(o.price),
+          mult: m !== null && m !== undefined ? `${m}x` : "",
         });
       }
     }
@@ -168,6 +174,11 @@ function printOddsResponse(resp: OddsResponseLike): void {
     { label: "LINE", value: (r) => r.point, numeric: true },
     { label: "PRICE", value: (r) => r.price, numeric: true },
   ];
+  // DFS boost/discount column — only shown when a book (Underdog) actually
+  // returns a multiplier, so standard sportsbook output stays unchanged.
+  if (anyMult) {
+    cols.push({ label: "MULT", value: (r) => r.mult, numeric: true });
+  }
   printTable(rows, cols);
 }
 
