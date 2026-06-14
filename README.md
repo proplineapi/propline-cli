@@ -1,6 +1,6 @@
 # propline-cli
 
-Terminal interface for the [PropLine](https://prop-line.com) player props betting odds API. Wraps the [`propline`](https://www.npmjs.com/package/propline) Node SDK with pretty-printed tables and a `--json` opt-out.
+Terminal interface for the [PropLine](https://prop-line.com/?ref=cli) player props betting odds API. Wraps the [`propline`](https://www.npmjs.com/package/propline) Node SDK with pretty-printed tables and a `--json` opt-out.
 
 ```bash
 npx propline-cli live
@@ -17,7 +17,7 @@ Set your API key once:
 export PROPLINE_API_KEY=your_key_here
 ```
 
-Or pass `--api-key` per-invocation. Get a free key at <https://prop-line.com>.
+Or pass `--api-key` per-invocation. Get a free key at <https://prop-line.com/?ref=cli>.
 
 ## Quick examples
 
