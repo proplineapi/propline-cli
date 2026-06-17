@@ -14,6 +14,7 @@ import {
   cmdMovement,
   cmdGrandSalami,
   cmdDailyGoalsTotal,
+  cmdDfsPayouts,
   cmdResolutionSummary,
   cmdLive,
   cmdEv,
@@ -30,7 +31,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.13.0";
+export const VERSION = "0.14.0";
 
 const program = new Command();
 
@@ -202,6 +203,20 @@ program
   .description("Graded-prop volume + per-sport breakdown (free)")
   .action(function (this: Command) {
     return cmdResolutionSummary(gather(this));
+  });
+
+/* ── dfs-payouts ─────────────────────────────────────────────────────── */
+
+program
+  .command("dfs-payouts")
+  .option(
+    "--leg-win-prob <p>",
+    "assumed per-leg win prob 0-1 (adds expected return + +EV flag)",
+    (v) => parseFloat(v),
+  )
+  .description("PrizePicks Power/Flex payout schedule + per-leg breakeven (free)")
+  .action(function (this: Command) {
+    return cmdDfsPayouts(gather(this));
   });
 
 /* ── live ───────────────────────────────────────────────────────────── */

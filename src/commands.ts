@@ -435,6 +435,50 @@ export function cmdResolutionSummary(
   });
 }
 
+/* ── dfs-payouts ─────────────────────────────────────────────────────── */
+
+export function cmdDfsPayouts(
+  flags: CommonFlags & { legWinProb?: number },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const t = await client.getDfsPayouts({ legWinProb: flags.legWinProb });
+    if (flags.json) return printJson(t);
+    const withEv = flags.legWinProb !== undefined;
+    process.stdout.write(
+      `PrizePicks payout schedule + per-leg breakeven` +
+        (withEv ? ` @ ${(flags.legWinProb! * 100).toFixed(0)}% per leg` : "") +
+        `\n\n`,
+    );
+    const cols: Column<(typeof t.plays)[number]>[] = [
+      { label: "PLAY", value: (r) => r.play_type },
+      { label: "LEGS", value: (r) => String(r.legs), numeric: true },
+      {
+        label: "ALL-HIT",
+        value: (r) => `${r.all_correct_multiplier.toFixed(2)}x`,
+        numeric: true,
+      },
+      {
+        label: "BREAKEVEN",
+        value: (r) => `${(r.breakeven_leg_win_prob * 100).toFixed(1)}%`,
+        numeric: true,
+      },
+    ];
+    if (withEv) {
+      cols.push(
+        {
+          label: "EV/$1",
+          value: (r) => (r.expected_return ?? 0).toFixed(3),
+          numeric: true,
+        },
+        { label: "+EV?", value: (r) => (r.is_plus_ev ? "yes" : "no") },
+      );
+    }
+    printTable(t.plays, cols);
+    process.stdout.write(`\n${t.disclaimer}\n`);
+  });
+}
+
 /* ── live (cross-sport in-progress games) ────────────────────────────── */
 
 const LIVE_SPORTS = [
