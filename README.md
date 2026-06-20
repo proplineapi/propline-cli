@@ -49,6 +49,8 @@ propline player-history baseball_mlb "Aaron Judge" --market batter_home_runs
 # Aggregated hit-rate trends per market (Pro tier)
 propline player-trends baseball_mlb "Aaron Judge"
 propline player-trends baseball_mlb "Aaron Judge" --market batter_total_bases
+# Scope the trend to a PrizePicks flavor's line (standard | goblin | demon)
+propline player-trends baseball_mlb "Aaron Judge" --dfs-odds-type goblin
 
 # Bulk CSV export of resolved props (Pro tier)
 propline export-resolved-props --sport baseball_mlb --since 2026-04-01T00:00:00Z --out mlb-resolved.csv
@@ -76,7 +78,7 @@ propline webhooks deliveries 42
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
 | `propline player-history <sport> <player>` | Recent prop history for a player on a market |
-| `propline player-trends <sport> <player>` | Aggregated hit-rate trends per market — L5/L10/L20/L50 over/under splits + current streak. `--market <key>` to filter (Pro full, Free redacted) |
+| `propline player-trends <sport> <player>` | Aggregated hit-rate trends per market — L5/L10/L20/L50 over/under splits + current streak. `--market <key>` to filter, `--dfs-odds-type <flavor>` to scope to a PrizePicks flavor (Pro full, Free redacted) |
 | `propline export-resolved-props --sport <key>` | Bulk CSV export of resolved props (Pro) |
 | `propline webhooks list / create / delete / test / deliveries` | Webhook management (Streaming) |
 

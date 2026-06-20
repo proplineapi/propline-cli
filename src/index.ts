@@ -31,7 +31,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.14.0";
+export const VERSION = "0.15.0";
 
 const program = new Command();
 
@@ -322,6 +322,10 @@ program
   .option(
     "-m, --market <key>",
     "filter to a single market key (e.g. batter_total_bases)",
+  )
+  .option(
+    "--dfs-odds-type <flavor>",
+    "PrizePicks flavor to compute trends against (standard | goblin | demon)",
   )
   .description(
     "Aggregated hit-rate trends per market — L5/L10/L20/L50 over/under splits + current streak (Pro full, Free redacted)",

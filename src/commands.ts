@@ -679,12 +679,14 @@ export function cmdPlayerTrends(
   player: string,
   flags: CommonFlags & {
     market?: string;
+    dfsOddsType?: "standard" | "goblin" | "demon";
   },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const resp = await client.getPlayerTrends(sport, player, {
       market: flags.market,
+      dfsOddsType: flags.dfsOddsType,
     });
     if (flags.json) return printJson(resp);
     process.stdout.write(
