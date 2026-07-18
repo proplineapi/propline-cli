@@ -58,21 +58,22 @@ export function cmdEvents(sport: string, flags: CommonFlags): Promise<void> {
 export function cmdOdds(
   sport: string,
   eventId: string | undefined,
-  flags: CommonFlags & { markets?: string; period?: string },
+  flags: CommonFlags & { markets?: string; bookmakers?: string; period?: string },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const markets = parseMarketsFlag(flags.markets);
     const period = flags.period;
+    const bookmakers = flags.bookmakers;
 
     if (eventId) {
-      const resp = await client.getOdds(sport, { eventId, markets, period });
+      const resp = await client.getOdds(sport, { eventId, markets, period, bookmakers });
       if (flags.json) return printJson(resp);
       printOddsResponse(resp);
       return;
     }
 
-    const resp = await client.getOdds(sport, { markets, period });
+    const resp = await client.getOdds(sport, { markets, period, bookmakers });
     if (flags.json) return printJson(resp);
     // Bulk: one row per (event, book, market, outcome) gets dense fast.
     // Collapse to a per-event summary row showing how many books / markets
@@ -315,12 +316,13 @@ export function cmdContext(
 export function cmdMovement(
   sport: string,
   eventId: string,
-  flags: CommonFlags & { markets?: string; period?: string },
+  flags: CommonFlags & { markets?: string; bookmakers?: string; period?: string },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const mv = await client.getMovement(sport, eventId, {
       markets: flags.markets ? flags.markets.split(",") : undefined,
+      bookmakers: flags.bookmakers,
       period: flags.period,
     });
     if (flags.json) return printJson(mv);
@@ -933,6 +935,7 @@ export function cmdHistory(
   eventId: string,
   flags: CommonFlags & {
     markets?: string;
+    bookmakers?: string;
     from?: string;
     to?: string;
     relativeFrom?: string;
@@ -947,6 +950,7 @@ export function cmdHistory(
     const markets = parseMarketsFlag(flags.markets);
     const hist = await client.getOddsHistory(sport, eventId, {
       markets,
+      bookmakers: flags.bookmakers,
       from: flags.from,
       to: flags.to,
       relativeFrom: flags.relativeFrom,
@@ -1014,12 +1018,16 @@ export function cmdHistory(
 export function cmdClosing(
   sport: string,
   eventId: string,
-  flags: CommonFlags & { markets?: string; period?: string },
+  flags: CommonFlags & { markets?: string; bookmakers?: string; period?: string },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const markets = parseMarketsFlag(flags.markets);
-    const closing = await client.getOddsClosing(sport, eventId, { markets, period: flags.period });
+    const closing = await client.getOddsClosing(sport, eventId, {
+      markets,
+      bookmakers: flags.bookmakers,
+      period: flags.period,
+    });
     if (flags.json) return printJson(closing);
     type Row = {
       book: string;

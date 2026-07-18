@@ -31,7 +31,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.15.0";
+export const VERSION = "0.16.0";
 
 const program = new Command();
 
@@ -101,6 +101,10 @@ program
     "comma-separated market keys (e.g. h2h,spreads,totals or player_points)",
   )
   .option(
+    "-b, --bookmakers <list>",
+    "comma-separated bookmaker keys (e.g. draftkings,fanduel). Omit for all books",
+  )
+  .option(
     "-p, --period <codes>",
     "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",
   )
@@ -156,6 +160,10 @@ program
   .argument("<sport>", "sport key")
   .argument("<event_id>", "event id")
   .option("-m, --markets <list>", "comma-separated market keys (default h2h,spreads,totals)")
+  .option(
+    "-b, --bookmakers <list>",
+    "comma-separated bookmaker keys (e.g. draftkings,fanduel). Omit for all books",
+  )
   .option(
     "-p, --period <codes>",
     "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",
@@ -270,6 +278,10 @@ program
   )
   .option("--changes-only", "drop snapshots whose (price, point) match the previous one", false)
   .option(
+    "-b, --bookmakers <list>",
+    "comma-separated bookmaker keys (e.g. draftkings,fanduel). Omit for all books",
+  )
+  .option(
     "-p, --period <codes>",
     "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",
   )
@@ -285,6 +297,10 @@ program
   .argument("<sport>", "sport key")
   .argument("<event_id>", "event id")
   .option("-m, --markets <list>", "comma-separated market keys (default h2h,spreads,totals)")
+  .option(
+    "-b, --bookmakers <list>",
+    "comma-separated bookmaker keys (e.g. draftkings,fanduel). Omit for all books",
+  )
   .option(
     "-p, --period <codes>",
     "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",

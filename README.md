@@ -34,6 +34,9 @@ propline odds baseball_mlb 12345 --markets h2h,spreads,totals,player_points
 # First-quarter NBA totals only (game-period filter on every odds command)
 propline odds basketball_nba 12345 --markets totals --period q1
 
+# Only DraftKings + FanDuel lines (bookmaker filter on every odds command)
+propline odds baseball_mlb 12345 --markets pitcher_strikeouts --bookmakers draftkings,fanduel
+
 # Scores from the last 3 days
 propline scores basketball_nba
 
@@ -67,7 +70,7 @@ propline webhooks deliveries 42
 | --- | --- |
 | `propline sports` | List available sports |
 | `propline events <sport>` | List upcoming events for a sport |
-| `propline odds <sport> [event_id]` | Bulk odds (no event_id) or per-event (with). `--period q1` (or `h1`/`p1`/`f5`/…) filters to game-period markets. |
+| `propline odds <sport> [event_id]` | Bulk odds (no event_id) or per-event (with). `--period q1` (or `h1`/`p1`/`f5`/…) filters to game-period markets; `--bookmakers draftkings,fanduel` filters to specific books. |
 | `propline history <sport> <event_id>` | Historical line movement; supports `--from`/`--to`, `--relative-from`/`--relative-to`, `--interval`, `--changes-only`, `--period` (Hobby+) |
 | `propline closing <sport> <event_id>` | Closing line per (book, market, outcome) — CLV helper. `--period` accepted (Hobby+) |
 | `propline scores <sport>` | Recent scores + status |
