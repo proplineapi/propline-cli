@@ -611,6 +611,59 @@ export function cmdEv(
   });
 }
 
+/* ── best-line ──────────────────────────────────────────────────────── */
+
+export function cmdBestLine(
+  sport: string,
+  eventId: string,
+  flags: CommonFlags & { markets?: string; bookmakers?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const resp = await client.getEventBestLine(sport, eventId, {
+      markets: parseMarketsFlag(flags.markets),
+      bookmakers: flags.bookmakers,
+    });
+    if (flags.json) return printJson(resp);
+    type Row = {
+      market: string;
+      player: string;
+      point: string;
+      side: string;
+      book: string;
+      price: string;
+      books: string;
+    };
+    const rows: Row[] = [];
+    for (const line of resp.lines) {
+      for (const [side, info] of Object.entries(line.sides)) {
+        rows.push({
+          market: line.market_key,
+          player: line.description,
+          point: formatPoint(line.point),
+          side,
+          book: info.best.book_title,
+          price: formatPrice(info.best.price),
+          books: String(info.all_prices.length),
+        });
+      }
+    }
+    process.stdout.write(
+      `${resp.away_team} @ ${resp.home_team} · books considered: ${resp.books_considered.join(", ")}\n`,
+    );
+    const cols: Column<Row>[] = [
+      { label: "MARKET", value: (r) => r.market },
+      { label: "PLAYER", value: (r) => truncate(r.player, 24) },
+      { label: "LINE", value: (r) => r.point, numeric: true },
+      { label: "SIDE", value: (r) => r.side },
+      { label: "BEST BOOK", value: (r) => r.book },
+      { label: "PRICE", value: (r) => r.price, numeric: true },
+      { label: "N BOOKS", value: (r) => r.books, numeric: true },
+    ];
+    printTable(rows, cols);
+  });
+}
+
 /* ── player-history ─────────────────────────────────────────────────── */
 
 export function cmdPlayerHistory(

@@ -80,6 +80,7 @@ propline webhooks deliveries 42
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
+| `propline best-line <sport> <event_id>` | Cross-book line shopping — best price per (market, player, line) across all comparable books. `--markets` + `--bookmakers` filters (Hobby+) |
 | `propline player-history <sport> <player>` | Recent prop history for a player on a market |
 | `propline player-trends <sport> <player>` | Aggregated hit-rate trends per market — L5/L10/L20/L50 over/under splits + current streak. `--market <key>` to filter, `--dfs-odds-type <flavor>` to scope to a PrizePicks flavor (Pro full, Free redacted) |
 | `propline export-resolved-props --sport <key>` | Bulk CSV export of resolved props (Pro) |

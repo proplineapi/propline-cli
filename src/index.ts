@@ -18,6 +18,7 @@ import {
   cmdResolutionSummary,
   cmdLive,
   cmdEv,
+  cmdBestLine,
   cmdPlayerHistory,
   cmdPlayerTrends,
   cmdExportResolvedProps,
@@ -31,7 +32,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.16.0";
+export const VERSION = "0.17.0";
 
 const program = new Command();
 
@@ -253,6 +254,24 @@ program
   .description("Cross-book +EV against a sharp no-vig fair line (Pro tier)")
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdEv(sport, eventId, gather(this));
+  });
+
+/* ── best-line ──────────────────────────────────────────────────────── */
+
+program
+  .command("best-line")
+  .argument("<sport>", "sport key")
+  .argument("<event_id>", "event id")
+  .option("-m, --markets <list>", "comma-separated market keys")
+  .option(
+    "-b, --bookmakers <list>",
+    "comma-separated bookmaker keys (e.g. draftkings,fanduel) — shop only your books",
+  )
+  .description(
+    "Cross-book line shopping: best price per (market, player, line) across all comparable books (Hobby+)",
+  )
+  .action(function (this: Command, sport: string, eventId: string) {
+    return cmdBestLine(sport, eventId, gather(this) as never);
   });
 
 /* ── history ────────────────────────────────────────────────────────── */
