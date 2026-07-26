@@ -32,7 +32,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.17.1";
+export const VERSION = "0.17.2";
 
 const program = new Command();
 
@@ -477,5 +477,11 @@ webhooks
 
 program.parseAsync().catch((err) => {
   process.stderr.write(`error: ${err instanceof Error ? err.message : String(err)}\n`);
+  // Structured API errors carry the exact URL that unlocks the feature
+  // or lifts the cap — surface it instead of making the user hunt.
+  const upgradeUrl = (err as { upgradeUrl?: unknown })?.upgradeUrl;
+  if (typeof upgradeUrl === "string" && upgradeUrl) {
+    process.stderr.write(`upgrade: ${upgradeUrl}\n`);
+  }
   process.exit(1);
 });
