@@ -58,22 +58,35 @@ export function cmdEvents(sport: string, flags: CommonFlags): Promise<void> {
 export function cmdOdds(
   sport: string,
   eventId: string | undefined,
-  flags: CommonFlags & { markets?: string; bookmakers?: string; period?: string },
+  flags: CommonFlags & {
+    markets?: string;
+    bookmakers?: string;
+    period?: string;
+    links?: boolean;
+  },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const markets = parseMarketsFlag(flags.markets);
     const period = flags.period;
     const bookmakers = flags.bookmakers;
+    const includeLinks = flags.links;
 
     if (eventId) {
-      const resp = await client.getOdds(sport, { eventId, markets, period, bookmakers });
+      const resp = await client.getOdds(sport, {
+        eventId,
+        markets,
+        period,
+        bookmakers,
+        includeLinks,
+      });
       if (flags.json) return printJson(resp);
       printOddsResponse(resp);
+      printEventLinks(resp.bookmakers);
       return;
     }
 
-    const resp = await client.getOdds(sport, { markets, period, bookmakers });
+    const resp = await client.getOdds(sport, { markets, period, bookmakers, includeLinks });
     if (flags.json) return printJson(resp);
     // Bulk: one row per (event, book, market, outcome) gets dense fast.
     // Collapse to a per-event summary row showing how many books / markets
@@ -125,6 +138,17 @@ interface OddsResponseLike {
       }>;
     }>;
   }>;
+}
+
+function printEventLinks(
+  bookmakers: Array<{ key: string; title: string; link?: string | null }>,
+): void {
+  const linked = bookmakers.filter((b) => b.link);
+  if (!linked.length) return;
+  process.stdout.write("\nEvent pages:\n");
+  for (const b of linked) {
+    process.stdout.write(`  ${b.title}: ${b.link}\n`);
+  }
 }
 
 function printOddsResponse(resp: OddsResponseLike): void {
@@ -616,13 +640,14 @@ export function cmdEv(
 export function cmdBestLine(
   sport: string,
   eventId: string,
-  flags: CommonFlags & { markets?: string; bookmakers?: string },
+  flags: CommonFlags & { markets?: string; bookmakers?: string; links?: boolean },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const resp = await client.getEventBestLine(sport, eventId, {
       markets: parseMarketsFlag(flags.markets),
       bookmakers: flags.bookmakers,
+      includeLinks: flags.links,
     });
     if (flags.json) return printJson(resp);
     type Row = {
@@ -661,6 +686,23 @@ export function cmdBestLine(
       { label: "N BOOKS", value: (r) => r.books, numeric: true },
     ];
     printTable(rows, cols);
+    if (flags.links) {
+      const links = new Map<string, string>();
+      for (const line of resp.lines) {
+        for (const info of Object.values(line.sides)) {
+          for (const price of info.all_prices) {
+            const link = (price as { link?: string | null }).link;
+            if (link) links.set(price.book_title, link);
+          }
+        }
+      }
+      if (links.size) {
+        process.stdout.write("\nEvent pages:\n");
+        for (const [title, link] of links) {
+          process.stdout.write(`  ${title}: ${link}\n`);
+        }
+      }
+    }
   });
 }
 

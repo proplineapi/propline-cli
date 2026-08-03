@@ -32,7 +32,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.17.2";
+export const VERSION = "0.18.0";
 
 const program = new Command();
 
@@ -108,6 +108,10 @@ program
   .option(
     "-p, --period <codes>",
     "game-period filter: q1..q4, h1/h2, p1..p3, i1..i9, f3/f5/f7 (comma-separated, or 'all'). Omit for full-game only",
+  )
+  .option(
+    "--links",
+    "include each book's public event-page URL (Bovada/DK/FanDuel/BetMGM/Kalshi/Polymarket/Smarkets)",
   )
   .description("Get current odds across all books")
   .action(function (this: Command, sport: string, eventId: string | undefined) {
@@ -266,6 +270,10 @@ program
   .option(
     "-b, --bookmakers <list>",
     "comma-separated bookmaker keys (e.g. draftkings,fanduel) — shop only your books",
+  )
+  .option(
+    "--links",
+    "include each book's public event-page URL per price row (click out to the book)",
   )
   .description(
     "Cross-book line shopping: best price per (market, player, line) across all comparable books (Hobby+)",
