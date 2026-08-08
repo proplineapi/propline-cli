@@ -63,6 +63,7 @@ export function cmdOdds(
     bookmakers?: string;
     period?: string;
     links?: boolean;
+    bookIds?: boolean;
   },
 ): Promise<void> {
   return runCommand(async () => {
@@ -71,6 +72,7 @@ export function cmdOdds(
     const period = flags.period;
     const bookmakers = flags.bookmakers;
     const includeLinks = flags.links;
+    const includeBookIds = flags.bookIds;
 
     if (eventId) {
       const resp = await client.getOdds(sport, {
@@ -79,6 +81,7 @@ export function cmdOdds(
         period,
         bookmakers,
         includeLinks,
+        includeBookIds,
       });
       if (flags.json) return printJson(resp);
       printOddsResponse(resp);
@@ -86,7 +89,13 @@ export function cmdOdds(
       return;
     }
 
-    const resp = await client.getOdds(sport, { markets, period, bookmakers, includeLinks });
+    const resp = await client.getOdds(sport, {
+      markets,
+      period,
+      bookmakers,
+      includeLinks,
+      includeBookIds,
+    });
     if (flags.json) return printJson(resp);
     // Bulk: one row per (event, book, market, outcome) gets dense fast.
     // Collapse to a per-event summary row showing how many books / markets

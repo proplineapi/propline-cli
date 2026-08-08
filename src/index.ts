@@ -32,7 +32,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.18.0";
+export const VERSION = "0.19.0";
 
 const program = new Command();
 
@@ -112,6 +112,10 @@ program
   .option(
     "--links",
     "include each book's public event-page URL (Bovada/DK/FanDuel/BetMGM/Kalshi/Polymarket/Smarkets)",
+  )
+  .option(
+    "--book-ids",
+    "include each book's own ids (book_event_id per book, book_outcome_id per outcome) for joining onto a book's native feed — Kalshi ships its event + per-contract tickers. Best with --json",
   )
   .description("Get current odds across all books")
   .action(function (this: Command, sport: string, eventId: string | undefined) {
