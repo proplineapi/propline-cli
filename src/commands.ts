@@ -1139,6 +1139,8 @@ export function cmdClosing(
       player: string;
       side: string;
       closingAt: string;
+      openPoint: string;
+      openPrice: string;
       point: string;
       price: string;
     };
@@ -1152,6 +1154,11 @@ export function cmdClosing(
             player: o.description ?? "",
             side: o.name,
             closingAt: o.closing_at ? formatTime(o.closing_at) : "",
+            openPoint: formatPoint(o.opening_point ?? null),
+            openPrice:
+              o.opening_price === null || o.opening_price === undefined
+                ? ""
+                : formatPrice(o.opening_price),
             point: formatPoint(o.point ?? null),
             price: o.price === null ? "" : formatPrice(o.price),
           });
@@ -1173,6 +1180,8 @@ export function cmdClosing(
       { label: "PLAYER", value: (r) => truncate(r.player, 24) },
       { label: "SIDE", value: (r) => r.side },
       { label: "CLOSED AT", value: (r) => r.closingAt },
+      { label: "OPEN", value: (r) => r.openPoint, numeric: true },
+      { label: "OPEN PRICE", value: (r) => r.openPrice, numeric: true },
       { label: "LINE", value: (r) => r.point, numeric: true },
       { label: "PRICE", value: (r) => r.price, numeric: true },
     ];

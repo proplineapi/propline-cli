@@ -75,7 +75,7 @@ propline webhooks deliveries 42
 | `propline events <sport>` | List upcoming events for a sport |
 | `propline odds <sport> [event_id]` | Bulk odds (no event_id) or per-event (with). `--period q1` (or `h1`/`p1`/`f5`/…) filters to game-period markets; `--bookmakers draftkings,fanduel` filters to specific books; `--links` adds each book's public event-page URL (Bovada/DK/FanDuel/BetMGM/Kalshi/Polymarket/Smarkets — also on `best-line`). |
 | `propline history <sport> <event_id>` | Historical line movement; supports `--from`/`--to`, `--relative-from`/`--relative-to`, `--interval`, `--changes-only`, `--period` (Hobby+) |
-| `propline closing <sport> <event_id>` | Closing line per (book, market, outcome) — CLV helper. `--period` accepted (Hobby+) |
+| `propline closing <sport> <event_id>` | Opening **and** closing line per (book, market, outcome) — CLV helper. Table shows OPEN / OPEN PRICE beside LINE / PRICE. `--period` accepted (Hobby+) |
 | `propline scores <sport>` | Recent scores + status |
 | `propline futures <sport>` | Season-long futures — championship/division/conference winners, MVP + awards, season win totals across Bovada/FanDuel/DraftKings/Pinnacle (free) |
 | `propline context <sport> <event_id>` | Game conditions a prop settles under — probable pitchers, lineup, home-plate umpire, first-pitch weather (free) |
