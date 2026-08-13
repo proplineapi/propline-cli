@@ -49,6 +49,11 @@ propline context baseball_mlb 12345
 # Cross-book +EV plays (Pro tier)
 propline ev baseball_mlb 12345 --plus
 
+# ...priced only at the books you hold accounts at. This narrows the
+# prices, never the fair-line anchor — DK is still measured against
+# Pinnacle.
+propline ev baseball_mlb 12345 --plus --bookmakers draftkings,fanduel
+
 # Player prop history (Pro tier)
 propline player-history baseball_mlb "Aaron Judge" --market batter_home_runs
 

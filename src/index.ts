@@ -32,7 +32,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.20.0";
+export const VERSION = "0.21.0";
 
 const program = new Command();
 
@@ -254,6 +254,10 @@ program
   .argument("<sport>", "sport key")
   .argument("<event_id>", "event id")
   .option("-m, --markets <list>", "comma-separated market keys")
+  .option(
+    "-b, --bookmakers <list>",
+    "comma-separated bookmaker keys (e.g. draftkings,fanduel) — price only your books; never changes the fair-line anchor",
+  )
   .option(
     "--plus",
     "show only +EV outcomes (filter rows where ev_pct > 0)",

@@ -591,12 +591,15 @@ export function cmdLive(flags: CommonFlags): Promise<void> {
 export function cmdEv(
   sport: string,
   eventId: string,
-  flags: CommonFlags & { markets?: string; plus?: boolean },
+  flags: CommonFlags & { markets?: string; bookmakers?: string; plus?: boolean },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     const resp = await client.getEventEv(sport, eventId, {
       markets: parseMarketsFlag(flags.markets),
+      // Narrows the prices, never the anchor: --bookmakers draftkings
+      // still measures DK against Pinnacle.
+      bookmakers: flags.bookmakers,
     });
     if (flags.json) return printJson(resp);
     type Row = {
