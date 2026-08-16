@@ -69,6 +69,8 @@ propline export-resolved-props --sport baseball_mlb --since 2026-04-01T00:00:00Z
 # Manage webhook subscriptions (Streaming tier)
 propline webhooks list
 propline webhooks create --url https://example.com/hook --events line_movement,resolution --sport baseball_mlb
+# Hear when 3+ books pull the same player pregame (a late scratch); drop --min-books-agreeing for every drop
+propline webhooks create --url https://example.com/hook --events market_suspended --sport baseball_mlb --min-books-agreeing 3
 propline webhooks deliveries 42
 ```
 
