@@ -105,6 +105,20 @@ Run `propline <cmd> --help` for the full flag set on any command.
 - `--timeout <seconds>` — request timeout (default 15)
 - `--json` — emit raw JSON instead of a table; pipe-friendly with `jq`
 
+## Links
+
+- **Website**: [prop-line.com](https://prop-line.com/?ref=cli)
+- **API Docs**: [prop-line.com/docs](https://prop-line.com/docs?ref=cli)
+- **Recipes** (code for common jobs): [prop-line.com/recipes](https://prop-line.com/recipes?ref=cli)
+- **Odds API by sport and market** (live line, books, graded hit rate): [prop-line.com/odds-api](https://prop-line.com/odds-api?ref=cli)
+- **Prop resolution** (every prop graded against the box score): [prop-line.com/prop-resolution-api](https://prop-line.com/prop-resolution-api?ref=cli)
+- **Cross-book +EV**: [prop-line.com/ev](https://prop-line.com/ev?ref=cli)
+- **Pricing**: [prop-line.com/pricing](https://prop-line.com/pricing?ref=cli)
+- **Dashboard**: [prop-line.com/dashboard](https://prop-line.com/dashboard)
+- **OpenAPI reference**: [api.prop-line.com/docs](https://api.prop-line.com/docs)
+- **Node SDK** (what this wraps): [`npm install propline`](https://www.npmjs.com/package/propline)
+- **Python SDK**: [`pip install propline`](https://pypi.org/project/propline/)
+
 ## License
 
 MIT

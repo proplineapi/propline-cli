@@ -32,7 +32,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.22.0";
+export const VERSION = "0.22.1";
 
 const program = new Command();
 
