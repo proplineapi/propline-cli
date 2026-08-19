@@ -1009,7 +1009,7 @@ export function cmdWebhooksTest(id: string, flags: CommonFlags): Promise<void> {
 
 export function cmdWebhooksDeliveries(
   id: string,
-  flags: CommonFlags & { limit?: number },
+  flags: CommonFlags & { limit?: number; beforeId?: number },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
@@ -1019,6 +1019,7 @@ export function cmdWebhooksDeliveries(
     }
     const deliveries = await client.listWebhookDeliveries(numeric, {
       limit: flags.limit,
+      beforeId: flags.beforeId,
     });
     if (flags.json) return printJson(deliveries);
     type D = (typeof deliveries)[number];

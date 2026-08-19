@@ -32,7 +32,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.22.1";
+export const VERSION = "0.23.0";
 
 const program = new Command();
 
@@ -488,10 +488,15 @@ webhooks
 webhooks
   .command("deliveries")
   .argument("<id>", "webhook id")
-  .option("-l, --limit <n>", "max deliveries (default 50)", (v) =>
+  .option("-l, --limit <n>", "max deliveries (default 50, max 200)", (v) =>
     parseInt(v, 10),
   )
-  .description("Show recent delivery attempts for a webhook")
+  .option(
+    "--before-id <id>",
+    "page backwards: smallest id from the previous page",
+    (v) => parseInt(v, 10),
+  )
+  .description("Show recent delivery attempts for a webhook (newest first)")
   .action(function (this: Command, id: string) {
     return cmdWebhooksDeliveries(id, gather(this) as never);
   });
