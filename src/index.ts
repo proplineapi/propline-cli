@@ -32,7 +32,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.23.0";
+export const VERSION = "0.24.0";
 
 const program = new Command();
 
@@ -462,6 +462,11 @@ webhooks
   .option(
     "--min-books-agreeing <n>",
     "market_suspended only: books that must have pulled the same player/market before you hear it (unset = every drop, 3 = late scratches)",
+    (v) => parseInt(v, 10),
+  )
+  .option(
+    "--batch-max <n>",
+    "batched delivery: up to N events per POST as a signed envelope (1-500; recommended for high-volume subscriptions; 0 = per-event)",
     (v) => parseInt(v, 10),
   )
   .description("Register a webhook subscription (returns the signing secret ONCE)")

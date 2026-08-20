@@ -946,6 +946,7 @@ export function cmdWebhooksCreate(
     minPriceChangePct?: number;
     minSteamScore?: number;
     minBooksAgreeing?: number;
+    batchMax?: number;
   },
 ): Promise<void> {
   return runCommand(async () => {
@@ -965,6 +966,7 @@ export function cmdWebhooksCreate(
       minPriceChangePct: flags.minPriceChangePct,
       minSteamScore: flags.minSteamScore,
       minBooksAgreeing: flags.minBooksAgreeing,
+      batchMax: flags.batchMax,
     });
     if (flags.json) return printJson(hook);
     process.stdout.write(
