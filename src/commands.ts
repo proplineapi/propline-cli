@@ -150,13 +150,20 @@ interface OddsResponseLike {
 }
 
 function printEventLinks(
-  bookmakers: Array<{ key: string; title: string; link?: string | null }>,
+  bookmakers: Array<{
+    key: string;
+    title: string;
+    link?: string | null;
+    app_link?: string | null;
+  }>,
 ): void {
-  const linked = bookmakers.filter((b) => b.link);
+  const linked = bookmakers.filter((b) => b.link || b.app_link);
   if (!linked.length) return;
   process.stdout.write("\nEvent pages:\n");
   for (const b of linked) {
-    process.stdout.write(`  ${b.title}: ${b.link}\n`);
+    if (b.link) process.stdout.write(`  ${b.title}: ${b.link}\n`);
+    // Mobile app-open deep link (ProphetX only today) — shown when present.
+    if (b.app_link) process.stdout.write(`  ${b.title} (app): ${b.app_link}\n`);
   }
 }
 
@@ -700,18 +707,27 @@ export function cmdBestLine(
     printTable(rows, cols);
     if (flags.links) {
       const links = new Map<string, string>();
+      const appLinks = new Map<string, string>();
       for (const line of resp.lines) {
         for (const info of Object.values(line.sides)) {
           for (const price of info.all_prices) {
-            const link = (price as { link?: string | null }).link;
-            if (link) links.set(price.book_title, link);
+            const p = price as {
+              link?: string | null;
+              app_link?: string | null;
+            };
+            if (p.link) links.set(price.book_title, p.link);
+            // Mobile app-open deep link (ProphetX only today).
+            if (p.app_link) appLinks.set(price.book_title, p.app_link);
           }
         }
       }
-      if (links.size) {
+      if (links.size || appLinks.size) {
         process.stdout.write("\nEvent pages:\n");
         for (const [title, link] of links) {
           process.stdout.write(`  ${title}: ${link}\n`);
+        }
+        for (const [title, link] of appLinks) {
+          process.stdout.write(`  ${title} (app): ${link}\n`);
         }
       }
     }
