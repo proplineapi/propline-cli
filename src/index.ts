@@ -25,6 +25,7 @@ import {
   cmdExportOddsHistory,
   cmdHistory,
   cmdClosing,
+  cmdClv,
   cmdWebhooksList,
   cmdWebhooksCreate,
   cmdWebhooksDelete,
@@ -32,7 +33,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.24.1";
+export const VERSION = "0.25.0";
 
 const program = new Command();
 
@@ -323,6 +324,16 @@ program
   .description("Historical line movement for an event with period filters (Hobby+)")
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdHistory(sport, eventId, gather(this) as never);
+  });
+
+/* ── closing ────────────────────────────────────────────────────────── */
+
+program
+  .command("clv")
+  .argument("<file>", 'JSON file of placed bets, or "-" for stdin')
+  .description("Grade placed bets against their closing lines — CLV (Hobby+)")
+  .action(function (this: Command, file: string) {
+    return cmdClv(file, gather(this) as never);
   });
 
 /* ── closing ────────────────────────────────────────────────────────── */

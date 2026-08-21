@@ -4,6 +4,7 @@
 // per-call state — so future ones can be added without touching the
 // existing surface.
 
+import { readFile } from "node:fs/promises";
 import type { PropLine, PlayerMarketTrend, HitRateSplit } from "propline";
 import { buildClient, runCommand, type ClientFlags } from "./client.js";
 import {
@@ -1142,6 +1143,117 @@ export function cmdHistory(
 }
 
 /* ── closing ────────────────────────────────────────────────────────── */
+
+export function cmdClv(
+  file: string,
+  flags: CommonFlags,
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+
+    // JSON only, deliberately. A bet log is usually a CSV, but a naive
+    // split(",") mangles any quoted field — "Tatis Jr., Fernando" becomes
+    // two columns — and silently grading the wrong bet is exactly the
+    // failure this endpoint's fail-closed matching exists to prevent.
+    // Pipe CSV through jq/csvkit rather than trusting a half parser here.
+    const raw =
+      file === "-"
+        ? await new Promise<string>((resolve, reject) => {
+            let buf = "";
+            process.stdin.setEncoding("utf8");
+            process.stdin.on("data", (c) => (buf += c));
+            process.stdin.on("end", () => resolve(buf));
+            process.stdin.on("error", reject);
+          })
+        : await readFile(file, "utf8");
+
+    let bets: unknown;
+    try {
+      bets = JSON.parse(raw);
+    } catch (e) {
+      throw new Error(
+        `Could not parse ${file === "-" ? "stdin" : file} as JSON: ${
+          (e as Error).message
+        }`,
+      );
+    }
+    if (!Array.isArray(bets)) {
+      throw new Error("Expected a JSON array of bet objects.");
+    }
+
+    const res = await client.gradeClv(bets as never);
+    if (flags.json) return printJson(res);
+
+    const s = res.summary;
+    process.stdout.write(
+      `${s.matched}/${s.bets} matched` +
+        (s.unmatched ? ` · ${s.unmatched} unmatched` : "") +
+        (s.pending ? ` · ${s.pending} pending (event not started)` : "") +
+        `\n`,
+    );
+    if (s.avg_clv_pct !== null && s.avg_clv_pct !== undefined) {
+      process.stdout.write(
+        `avg CLV ${s.avg_clv_pct > 0 ? "+" : ""}${s.avg_clv_pct}% · ` +
+          `vs de-vigged close ${
+            s.avg_ev_vs_close_pct !== null && s.avg_ev_vs_close_pct !== undefined
+              ? `${s.avg_ev_vs_close_pct > 0 ? "+" : ""}${s.avg_ev_vs_close_pct}%`
+              : "n/a"
+          } · beat the close ${s.beat_close_pct ?? "n/a"}%` +
+          (s.profit_units !== null && s.profit_units !== undefined
+            ? ` · ${s.profit_units > 0 ? "+" : ""}${s.profit_units}u`
+            : "") +
+          `\n`,
+      );
+    }
+
+    type Row = {
+      ref: string;
+      selection: string;
+      price: string;
+      close: string;
+      clv: string;
+      evClose: string;
+      anchor: string;
+      result: string;
+    };
+    const rows: Row[] = (res.bets ?? []).map((b) => ({
+      ref: b.ref ?? "",
+      selection: `${b.selection}${b.side ? ` ${b.side}` : ""}${
+        b.point !== null && b.point !== undefined ? ` ${b.point}` : ""
+      }`,
+      price: formatPrice(b.price),
+      close: b.matched
+        ? b.closing_price === null || b.closing_price === undefined
+          ? ""
+          : formatPrice(b.closing_price)
+        : `— ${b.unmatched_reason ?? "unmatched"}`,
+      clv:
+        b.clv_pct === null || b.clv_pct === undefined
+          ? ""
+          : `${b.clv_pct > 0 ? "+" : ""}${b.clv_pct}%`,
+      evClose:
+        b.ev_vs_close_pct === null || b.ev_vs_close_pct === undefined
+          ? ""
+          : `${b.ev_vs_close_pct > 0 ? "+" : ""}${b.ev_vs_close_pct}%`,
+      // Pre-kickoff rows have no real close; say so rather than printing a
+      // CLV that is ~0 by construction.
+      anchor: b.matched && !b.closing_is_final ? "pending" : b.fair_source ?? "",
+      result: b.resolution ?? "",
+    }));
+
+    const cols: Column<Row>[] = [
+      { label: "REF", value: (r) => r.ref },
+      { label: "SELECTION", value: (r) => truncate(r.selection, 30) },
+      { label: "TOOK", value: (r) => r.price, numeric: true },
+      { label: "CLOSE", value: (r) => r.close, numeric: true },
+      { label: "CLV", value: (r) => r.clv, numeric: true },
+      { label: "VS DEVIG", value: (r) => r.evClose, numeric: true },
+      { label: "ANCHOR", value: (r) => r.anchor },
+      { label: "RESULT", value: (r) => r.result },
+    ];
+    printTable(rows, cols);
+  });
+}
 
 export function cmdClosing(
   sport: string,
