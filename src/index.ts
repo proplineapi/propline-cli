@@ -34,7 +34,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.26.0";
+export const VERSION = "0.27.0";
 
 const program = new Command();
 

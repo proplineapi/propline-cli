@@ -139,6 +139,8 @@ interface OddsResponseLike {
     title: string;
     markets?: Array<{
       key: string;
+      /** Canonical team name on a team total; null on a game market. */
+      team?: string | null;
       outcomes?: Array<{
         name: string;
         description?: string | null;
@@ -190,7 +192,13 @@ function printOddsResponse(resp: OddsResponseLike): void {
         if (m !== null && m !== undefined) anyMult = true;
         rows.push({
           book: book.title,
-          market: market.key,
+          // A team total and the game total both ride the `totals` key and
+          // differ only by point, which reads as one market mispriced.
+          // `team` is the API's own answer for which side it is scoped to
+          // (null on a game market), so surface it in the label.
+          market: market.team
+            ? `${market.key} (${market.team})`
+            : market.key,
           player: o.description ?? "",
           side: o.name,
           point: formatPoint(o.point ?? null),
