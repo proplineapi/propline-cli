@@ -793,6 +793,69 @@ export function cmdPlayerHistory(
   });
 }
 
+/* ── player-games ───────────────────────────────────────────────────── */
+
+export function cmdPlayerGames(
+  sport: string,
+  player: string,
+  flags: CommonFlags & {
+    limit?: number;
+    opponent?: string;
+    statType?: string;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const resp = await client.getPlayerGames(sport, player, {
+      limit: flags.limit,
+      opponent: flags.opponent,
+      statType: flags.statType,
+    });
+    if (flags.json) return printJson(resp);
+
+    const scope = resp.opponent ? ` vs ${resp.opponent}` : "";
+    process.stdout.write(
+      `${resp.player_name}${scope} (${resp.games.length} games)\n`,
+    );
+    if (resp.games.length === 0) return;
+
+    // Columns are data-driven: the stat vocabulary differs per sport, and
+    // within a sport a game can carry a stat an earlier one didn't (a pitcher
+    // in one row, a batter in the next), so take the union across games and
+    // keep first-seen order rather than hardcoding a per-sport list.
+    const statNames: string[] = [];
+    for (const g of resp.games) {
+      for (const name of Object.keys(g.stats)) {
+        if (!statNames.includes(name)) statNames.push(name);
+      }
+    }
+
+    type Game = (typeof resp.games)[number];
+    const cols: Column<Game>[] = [
+      { label: "DATE", value: (g) => formatTime(g.commence_time).slice(0, 10) },
+      {
+        label: "OPP",
+        value: (g) =>
+          g.opponent === null
+            ? `${g.away_team} @ ${g.home_team}`
+            : `${g.is_home ? "vs" : "@"} ${g.opponent}`,
+      },
+      ...statNames.map((name) => ({
+        label: name.toUpperCase(),
+        value: (g: Game) => {
+          const v = g.stats[name];
+          // A stat absent for this game is blank, never 0 — the player may
+          // simply not have been measured on it (a batter has no pitching
+          // line), and printing 0 would read as a real result.
+          return v === undefined ? "" : String(v);
+        },
+        numeric: true,
+      })),
+    ];
+    printTable(resp.games, cols);
+  });
+}
+
 /* ── player-trends ──────────────────────────────────────────────────── */
 
 function formatOverPct(w: HitRateSplit | null): string {

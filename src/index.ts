@@ -20,6 +20,7 @@ import {
   cmdEv,
   cmdBestLine,
   cmdPlayerHistory,
+  cmdPlayerGames,
   cmdPlayerTrends,
   cmdExportResolvedProps,
   cmdExportOddsHistory,
@@ -33,7 +34,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.25.0";
+export const VERSION = "0.26.0";
 
 const program = new Command();
 
@@ -373,6 +374,30 @@ program
   .description("Recent prop history for a player on a market (Pro full, Free redacted)")
   .action(function (this: Command, sport: string, player: string) {
     return cmdPlayerHistory(sport, player, gather(this) as never);
+  });
+
+/* ── player-games ───────────────────────────────────────────────────── */
+
+program
+  .command("player-games")
+  .argument("<sport>", "sport key")
+  .argument("<player>", 'player name (quote if it contains spaces — e.g. "Aaron Judge")')
+  .option("-l, --limit <n>", "games to return (1-100, default 20)", (v) =>
+    parseInt(v, 10),
+  )
+  .option(
+    "-o, --opponent <team>",
+    'head-to-head filter — name, nickname or abbreviation ("BOS"); the limit applies after it, so this is the last N MEETINGS',
+  )
+  .option(
+    "--stat-type <names>",
+    "comma-separated stat names to return (default: all)",
+  )
+  .description(
+    "Player game log — recent games with every raw box-score stat per game (free)",
+  )
+  .action(function (this: Command, sport: string, player: string) {
+    return cmdPlayerGames(sport, player, gather(this) as never);
   });
 
 /* ── player-trends ──────────────────────────────────────────────────── */
