@@ -75,6 +75,17 @@ propline webhooks deliveries 42
 propline webhooks deliveries 42 --limit 200 --before-id 123456  # page backwards
 ```
 
+### Player game log / head-to-head
+
+```bash
+# Every raw box-score stat, per game — build L5/L10/L20 from these.
+propline player-games baseball_mlb "Aaron Judge" --limit 10
+
+# Last 5 MEETINGS with Boston (not the Boston games among his last 5).
+propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
+  --stat-type hits,home_runs,rbis
+```
+
 ## Commands
 
 | Command | Description |
@@ -94,6 +105,7 @@ propline webhooks deliveries 42 --limit 200 --before-id 123456  # page backwards
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
 | `propline best-line <sport> <event_id>` | Cross-book line shopping — best price per (market, player, line) across all comparable books. `--markets` + `--bookmakers` filters (Hobby+) |
 | `propline player-history <sport> <player>` | Recent prop history for a player on a market |
+| `propline player-games <sport> <player>` | Game log — a player's recent games with every raw box-score stat per game, one call instead of one per event. `--opponent BOS` for head-to-head (the limit applies after the filter, so it's the last N *meetings*); `--stat-type` to narrow. Raw-stat archive, so it includes games no book priced (free) |
 | `propline player-trends <sport> <player>` | Aggregated hit-rate trends per market — L5/L10/L20/L50 over/under splits + current streak. `--market <key>` to filter, `--dfs-odds-type <flavor>` to scope to a PrizePicks flavor (Pro full, Free redacted) |
 | `propline export-resolved-props --sport <key>` | Bulk CSV export of resolved props (Pro) |
 | `propline webhooks list / create / delete / test / deliveries` | Webhook management (Streaming) |
