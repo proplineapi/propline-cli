@@ -1030,6 +1030,7 @@ export function cmdWebhooksCreate(
     sport?: string;
     market?: string;
     player?: string;
+    bookmakers?: string;
     eventId?: number;
     minPriceChangePct?: number;
     minSteamScore?: number;
@@ -1050,6 +1051,7 @@ export function cmdWebhooksCreate(
       filterSportKey: flags.sport,
       filterMarketKey: flags.market,
       filterPlayerName: flags.player,
+      filterBookmakerKey: flags.bookmakers,
       filterEventId: flags.eventId,
       minPriceChangePct: flags.minPriceChangePct,
       minSteamScore: flags.minSteamScore,

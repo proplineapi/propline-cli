@@ -34,7 +34,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.27.0";
+export const VERSION = "0.28.0";
 
 const program = new Command();
 
@@ -480,6 +480,10 @@ webhooks
   .option("--sport <key>", "filter to a single sport")
   .option("--market <key>", "filter to a single market key")
   .option("--player <name>", "filter to a player name (case-insensitive substring)")
+  .option(
+    "--bookmakers <list>",
+    "filter to comma-separated book keys, same vocabulary as ?bookmakers= (e.g. draftkings,fanduel); steam events are cross-book and unaffected",
+  )
   .option(
     "--event-id <id>",
     "filter to one event id (numeric)",
