@@ -18,6 +18,7 @@ import {
   cmdResolutionSummary,
   cmdLive,
   cmdEv,
+  cmdProjections,
   cmdBestLine,
   cmdPlayerHistory,
   cmdPlayerGames,
@@ -34,7 +35,7 @@ import {
   cmdWebhooksDeliveries,
 } from "./commands.js";
 
-export const VERSION = "0.28.0";
+export const VERSION = "0.29.0";
 
 const program = new Command();
 
@@ -268,6 +269,20 @@ program
   .description("Cross-book +EV against a sharp no-vig fair line (Pro tier)")
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdEv(sport, eventId, gather(this));
+  });
+
+/* ── projections ────────────────────────────────────────────────────── */
+
+program
+  .command("projections")
+  .argument("<sport>", "sport key")
+  .argument("<event_id>", "event id")
+  .option("-m, --markets <list>", "comma-separated market keys")
+  .description(
+    "Market-implied consensus projection per (market, player) — the line where the no-vig P(over) crosses 50%, median across books (Hobby+)",
+  )
+  .action(function (this: Command, sport: string, eventId: string) {
+    return cmdProjections(sport, eventId, gather(this));
   });
 
 /* ── best-line ──────────────────────────────────────────────────────── */

@@ -663,6 +663,50 @@ export function cmdEv(
   });
 }
 
+/* ── projections ────────────────────────────────────────────────────── */
+
+export function cmdProjections(
+  sport: string,
+  eventId: string,
+  flags: CommonFlags & { markets?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const resp = await client.getEventProjections(sport, eventId, {
+      markets: parseMarketsFlag(flags.markets),
+    });
+    if (flags.json) return printJson(resp);
+    type Row = {
+      market: string;
+      player: string;
+      value: string;
+      prob: string;
+      books: string;
+    };
+    const rows: Row[] = resp.projections.map((r) => ({
+      market: r.market_key,
+      player: r.player,
+      value: r.projected_value == null ? "—" : String(r.projected_value),
+      prob:
+        r.consensus_over_prob == null
+          ? "—"
+          : `${(r.consensus_over_prob * 100).toFixed(1)}%`,
+      books: String(r.books_contributing),
+    }));
+    process.stdout.write(
+      `${resp.away_team} @ ${resp.home_team} · market-implied (not a forecast)\n`,
+    );
+    const cols: Column<Row>[] = [
+      { label: "MARKET", value: (r) => r.market },
+      { label: "PLAYER", value: (r) => truncate(r.player, 24) },
+      { label: "PROJECTED", value: (r) => r.value, numeric: true },
+      { label: "P(OVER)", value: (r) => r.prob, numeric: true },
+      { label: "BOOKS", value: (r) => r.books, numeric: true },
+    ];
+    printTable(rows, cols);
+  });
+}
+
 /* ── best-line ──────────────────────────────────────────────────────── */
 
 export function cmdBestLine(

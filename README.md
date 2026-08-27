@@ -103,6 +103,7 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
+| `propline projections <sport> <event_id>` | Market-implied consensus projection per (market, player) — the line where no-vig P(over) crosses 50%, median across books (Hobby+) |
 | `propline best-line <sport> <event_id>` | Cross-book line shopping — best price per (market, player, line) across all comparable books. `--markets` + `--bookmakers` filters (Hobby+) |
 | `propline player-history <sport> <player>` | Recent prop history for a player on a market |
 | `propline player-games <sport> <player>` | Game log — a player's recent games with every raw box-score stat per game, one call instead of one per event. `--opponent BOS` for head-to-head (the limit applies after the filter, so it's the last N *meetings*); `--stat-type` to narrow. Raw-stat archive, so it includes games no book priced (free) |
