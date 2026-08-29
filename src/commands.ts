@@ -137,6 +137,12 @@ interface OddsResponseLike {
   bookmakers?: Array<{
     key: string;
     title: string;
+    /**
+     * True when the event is LIVE and this book does not price it in
+     * play — its prices are the last pregame quote and will not move
+     * again this game.
+     */
+    pregame_only?: boolean;
     markets?: Array<{
       key: string;
       /** Canonical team name on a team total; null on a game market. */
@@ -185,13 +191,21 @@ function printOddsResponse(resp: OddsResponseLike): void {
   };
   const rows: Row[] = [];
   let anyMult = false;
+  let anyFrozen = false;
   for (const book of resp.bookmakers ?? []) {
+    // The event is live and this book does not price it in play: its
+    // prices are the last PREGAME quote and will not move again this
+    // game. Marked rather than hidden — on the DFS books that frozen
+    // line is the number the bet settles against — but showing it
+    // unmarked next to books quoting seconds ago is the misleading part.
+    const frozen = book.pregame_only === true;
+    if (frozen) anyFrozen = true;
     for (const market of book.markets ?? []) {
       for (const o of market.outcomes ?? []) {
         const m = o.payout_multiplier;
         if (m !== null && m !== undefined) anyMult = true;
         rows.push({
-          book: book.title,
+          book: frozen ? `${book.title} *` : book.title,
           // A team total and the game total both ride the `totals` key and
           // differ only by point, which reads as one market mispriced.
           // `team` is the API's own answer for which side it is scoped to
@@ -230,6 +244,12 @@ function printOddsResponse(resp: OddsResponseLike): void {
     cols.push({ label: "MULT", value: (r) => r.mult, numeric: true });
   }
   printTable(rows, cols);
+  if (anyFrozen) {
+    process.stdout.write(
+      `\n* pregame price — this game is live and these books do not price it\n` +
+        `  in play, so these lines are frozen and will not move again.\n`,
+    );
+  }
 }
 
 /* ── scores ─────────────────────────────────────────────────────────── */
