@@ -79,6 +79,9 @@ propline webhooks deliveries 42 --limit 200 --before-id 123456  # page backwards
 # cursor has already aged out of retention.
 propline webhooks replay 42 --since-seq 4180
 propline webhooks replay 42 --since-seq 4180 --all --json
+
+# NOTE: global flags (--json, --api-key, --base-url, --timeout) were silently
+# ignored by every `webhooks <sub>` command before v0.31.1.
 ```
 
 ### Player game log / head-to-head

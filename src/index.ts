@@ -36,7 +36,7 @@ import {
   cmdWebhooksReplay,
 } from "./commands.js";
 
-export const VERSION = "0.31.0";
+export const VERSION = "0.31.1";
 
 const program = new Command();
 
@@ -71,9 +71,22 @@ program
 // Helper to merge global + command-local options into the flat shape
 // the handlers expect. Keeps each command call site terse.
 function gather(cmd: Command): Record<string, unknown> {
-  const own = cmd.opts();
-  const parent = cmd.parent?.opts() ?? {};
-  return { ...parent, ...own };
+  // Walk the WHOLE ancestor chain, not just one level. The global flags
+  // (--api-key, --base-url, --timeout, --json) live on `program`, so a
+  // one-level lookup only reaches them for top-level commands. Every
+  // `webhooks <sub>` command is two levels deep and silently dropped all
+  // four: `propline webhooks deliveries 42 --json` printed a table, and
+  // `--api-key` on the command line was ignored in favour of the env var.
+  // Nothing errored — the flags just did nothing, which is why it survived
+  // (found 2026-08-31 while smoke-testing `webhooks replay`).
+  //
+  // Nearest ancestor wins, so a command-local option can still shadow a
+  // global of the same name.
+  const chain: Record<string, unknown>[] = [];
+  for (let c: Command | null = cmd; c; c = c.parent) {
+    chain.unshift(c.opts());
+  }
+  return Object.assign({}, ...chain) as Record<string, unknown>;
 }
 
 /* ── sports ─────────────────────────────────────────────────────────── */
