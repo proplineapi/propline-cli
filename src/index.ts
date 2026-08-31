@@ -33,9 +33,10 @@ import {
   cmdWebhooksDelete,
   cmdWebhooksTest,
   cmdWebhooksDeliveries,
+  cmdWebhooksReplay,
 } from "./commands.js";
 
-export const VERSION = "0.30.0";
+export const VERSION = "0.31.0";
 
 const program = new Command();
 
@@ -559,6 +560,23 @@ webhooks
   .description("Show recent delivery attempts for a webhook (newest first)")
   .action(function (this: Command, id: string) {
     return cmdWebhooksDeliveries(id, gather(this) as never);
+  });
+
+webhooks
+  .command("replay")
+  .argument("<id>", "webhook id")
+  .option(
+    "--since-seq <n>",
+    "read events after this X-PropLine-Sequence (default 0)",
+    (v) => parseInt(v, 10),
+  )
+  .option("-l, --limit <n>", "max events per page (default 100, max 500)", (v) =>
+    parseInt(v, 10),
+  )
+  .option("--all", "follow the cursor to the end of the retained window")
+  .description("Re-read missed webhook events from a cursor (oldest first)")
+  .action(function (this: Command, id: string) {
+    return cmdWebhooksReplay(id, gather(this) as never);
   });
 
 program.parseAsync().catch((err) => {

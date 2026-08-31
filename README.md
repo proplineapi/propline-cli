@@ -73,6 +73,12 @@ propline webhooks create --url https://example.com/hook --events line_movement,r
 propline webhooks create --url https://example.com/hook --events market_suspended --sport baseball_mlb --min-books-agreeing 3
 propline webhooks deliveries 42
 propline webhooks deliveries 42 --limit 200 --before-id 123456  # page backwards
+
+# Catch up after an outage: replay from the last X-PropLine-Sequence you
+# processed. Oldest-first, and it warns on stderr if anything after your
+# cursor has already aged out of retention.
+propline webhooks replay 42 --since-seq 4180
+propline webhooks replay 42 --since-seq 4180 --all --json
 ```
 
 ### Player game log / head-to-head

@@ -1194,6 +1194,71 @@ export function cmdWebhooksDeliveries(
   });
 }
 
+export function cmdWebhooksReplay(
+  id: string,
+  flags: CommonFlags & { sinceSeq?: number; limit?: number; all?: boolean },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const numeric = Number(id);
+    if (!Number.isFinite(numeric)) {
+      throw new Error(`webhook id must be numeric: ${id}`);
+    }
+
+    let cursor = flags.sinceSeq ?? 0;
+    const collected: Awaited<
+      ReturnType<typeof client.replayWebhookEvents>
+    >["events"] = [];
+    let page = await client.replayWebhookEvents(numeric, {
+      sinceSeq: cursor,
+      limit: flags.limit,
+    });
+    let truncated = page.truncated;
+    collected.push(...page.events);
+    cursor = page.next_seq;
+
+    // --all follows the cursor to the end of the retained window; without it
+    // a single page is fetched, which is the right default for eyeballing.
+    while (flags.all && page.has_more) {
+      page = await client.replayWebhookEvents(numeric, {
+        sinceSeq: cursor,
+        limit: flags.limit,
+      });
+      truncated = truncated || page.truncated;
+      collected.push(...page.events);
+      cursor = page.next_seq;
+    }
+
+    if (flags.json) {
+      return printJson({ ...page, events: collected, truncated });
+    }
+
+    type E = (typeof collected)[number];
+    const cols: Column<E>[] = [
+      { label: "SEQ", value: (r) => String(r.seq), numeric: true },
+      { label: "EVENT", value: (r) => String(r.event_type) },
+      { label: "CREATED", value: (r) => formatTime(r.created_at) },
+      { label: "DELIVERY", value: (r) => String(r.delivery_id), numeric: true },
+    ];
+    printTable(collected, cols);
+
+    // The whole reason this endpoint returns an object rather than a list: a
+    // short page must never read as "you are caught up".
+    if (truncated) {
+      process.stderr.write(
+        "warning: events after your cursor have aged out of retention and " +
+          "cannot be replayed — resync from the REST endpoints.\n",
+      );
+    }
+    const behind = page.latest_seq - cursor;
+    process.stdout.write(
+      `\ncursor ${cursor} of ${page.latest_seq}` +
+        (behind > 0 ? ` (${behind} event(s) still ahead)` : " (caught up)") +
+        "\n",
+    );
+  });
+}
+
 /* ── history ────────────────────────────────────────────────────────── */
 
 export function cmdHistory(
