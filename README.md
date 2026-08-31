@@ -80,6 +80,12 @@ propline webhooks deliveries 42 --limit 200 --before-id 123456  # page backwards
 propline webhooks replay 42 --since-seq 4180
 propline webhooks replay 42 --since-seq 4180 --all --json
 
+# Or stream it live over a websocket instead of receiving POSTs.
+# Line-delimited JSON on stdout with --json, so it pipes into jq.
+# Reconnects and resumes from the last seq automatically.
+propline stream 42 --since-seq 4180
+propline stream 42 --json | jq -r '.data.player_name'
+
 # NOTE: global flags (--json, --api-key, --base-url, --timeout) were silently
 # ignored by every `webhooks <sub>` command before v0.31.1.
 ```

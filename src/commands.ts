@@ -1259,6 +1259,47 @@ export function cmdWebhooksReplay(
   });
 }
 
+export function cmdStream(
+  id: string,
+  flags: CommonFlags & { sinceSeq?: number; once?: boolean },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const numeric = Number(id);
+    if (!Number.isFinite(numeric)) {
+      throw new Error(`webhook id must be numeric: ${id}`);
+    }
+
+    // Line-delimited JSON on stdout so this pipes into jq. The human-readable
+    // status goes to stderr, which keeps stdout a clean data stream.
+    for await (const ev of client.stream({
+      webhookId: numeric,
+      sinceSeq: flags.sinceSeq,
+      reconnect: !flags.once,
+      onTruncated: (ready) => {
+        process.stderr.write(
+          `warning: events after seq ${ready.since_seq} aged out of retention ` +
+            `and cannot be replayed — resync from the REST endpoints.\n`,
+        );
+      },
+      onReady: (ready) => {
+        process.stderr.write(
+          `connected: webhook ${ready.webhook_id}, latest_seq ${ready.latest_seq}\n`,
+        );
+      },
+    })) {
+      if (flags.json) {
+        process.stdout.write(JSON.stringify(ev) + "\n");
+      } else {
+        const who = (ev.data as Record<string, unknown>)?.player_name ?? "";
+        process.stdout.write(
+          `${String(ev.seq).padStart(8)}  ${ev.event_type}  ${who}\n`,
+        );
+      }
+    }
+  });
+}
+
 /* ── history ────────────────────────────────────────────────────────── */
 
 export function cmdHistory(

@@ -34,9 +34,10 @@ import {
   cmdWebhooksTest,
   cmdWebhooksDeliveries,
   cmdWebhooksReplay,
+  cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.31.1";
+export const VERSION = "0.32.0";
 
 const program = new Command();
 
@@ -590,6 +591,20 @@ webhooks
   .description("Re-read missed webhook events from a cursor (oldest first)")
   .action(function (this: Command, id: string) {
     return cmdWebhooksReplay(id, gather(this) as never);
+  });
+
+program
+  .command("stream")
+  .argument("<webhook-id>", "websocket subscription id (transport=websocket)")
+  .option(
+    "--since-seq <n>",
+    "resume from this sequence (default 0 = oldest retained)",
+    (v) => parseInt(v, 10),
+  )
+  .option("--once", "do not reconnect; exit when the socket closes")
+  .description("Stream a websocket subscription to stdout (line-delimited JSON with --json)")
+  .action(function (this: Command, id: string) {
+    return cmdStream(id, gather(this) as never);
   });
 
 program.parseAsync().catch((err) => {
