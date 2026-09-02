@@ -28,6 +28,7 @@ import {
   cmdHistory,
   cmdClosing,
   cmdClv,
+  cmdSgp,
   cmdWebhooksList,
   cmdWebhooksCreate,
   cmdWebhooksDelete,
@@ -37,7 +38,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.32.0";
+export const VERSION = "0.33.0";
 
 const program = new Command();
 
@@ -365,6 +366,19 @@ program
   .description("Grade placed bets against their closing lines — CLV (Hobby+)")
   .action(function (this: Command, file: string) {
     return cmdClv(file, gather(this) as never);
+  });
+
+/* ── sgp ────────────────────────────────────────────────────────────── */
+
+program
+  .command("sgp")
+  .argument("<sport>", "sport key")
+  .argument("<event_id>", "event id")
+  .argument("<file>", 'JSON file of legs (market, name, description, point, period), or "-" for stdin')
+  .option("-B, --bookmaker <key>", "book to price at (only fanduel today)", "fanduel")
+  .description("Price a same-game parlay at the book's own correlated odds (Hobby+)")
+  .action(function (this: Command, sport: string, eventId: string, file: string) {
+    return cmdSgp(sport, eventId, file, gather(this) as never);
   });
 
 /* ── closing ────────────────────────────────────────────────────────── */

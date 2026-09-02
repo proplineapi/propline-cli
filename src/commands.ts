@@ -1387,6 +1387,85 @@ export function cmdHistory(
 
 /* ── closing ────────────────────────────────────────────────────────── */
 
+export function cmdSgp(
+  sport: string,
+  eventId: string,
+  file: string,
+  flags: CommonFlags & { bookmaker?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const raw =
+      file === "-"
+        ? await new Promise<string>((resolve, reject) => {
+            let buf = "";
+            process.stdin.setEncoding("utf8");
+            process.stdin.on("data", (c) => (buf += c));
+            process.stdin.on("end", () => resolve(buf));
+            process.stdin.on("error", reject);
+          })
+        : await readFile(file, "utf8");
+    let legs: unknown;
+    try {
+      legs = JSON.parse(raw);
+    } catch (e) {
+      throw new Error(
+        `Could not parse ${file === "-" ? "stdin" : file} as JSON: ${
+          (e as Error).message
+        }`,
+      );
+    }
+    if (!Array.isArray(legs)) {
+      throw new Error("Expected a JSON array of leg objects (market, name, description, point, period).");
+    }
+
+    const q = await client.priceSgp(
+      sport,
+      eventId,
+      legs as never,
+      flags.bookmaker ?? "fanduel",
+    );
+    if (flags.json) return printJson(q);
+
+    process.stdout.write(
+      `${q.away_team} @ ${q.home_team} · ${q.bookmaker_title}\n`,
+    );
+    if (q.redacted) {
+      process.stdout.write("(free tier — prices redacted; Hobby+ unlocks the quote)\n");
+    } else if (q.quoted) {
+      process.stdout.write(
+        `SGP ${formatPrice(q.sgp_price ?? 0)} · independent ${formatPrice(
+          q.independent_price ?? 0,
+        )} · correlation ×${q.correlation_factor ?? "n/a"}\n`,
+      );
+    } else {
+      process.stdout.write("not quoted — the book will not offer this combination as an SGP\n");
+    }
+
+    type Row = { leg: string; price: string; live: string; status: string };
+    const rows: Row[] = q.legs.map((l) => ({
+      leg: `${l.market} ${l.description ? `${l.description} ` : ""}${l.name}${
+        l.point !== null && l.point !== undefined ? ` ${l.point}` : ""
+      }${l.period ? ` (${l.period})` : ""}`,
+      price: l.price === null || l.price === undefined ? "" : formatPrice(l.price),
+      live: l.book_price === null || l.book_price === undefined ? "" : formatPrice(l.book_price),
+      status:
+        l.accepted === null || l.accepted === undefined
+          ? ""
+          : l.accepted
+            ? "ok"
+            : (l.failure_code ?? "refused"),
+    }));
+    const cols: Column<Row>[] = [
+      { label: "LEG", value: (r) => truncate(r.leg, 48) },
+      { label: "STORED", value: (r) => r.price, numeric: true },
+      { label: "LIVE", value: (r) => r.live, numeric: true },
+      { label: "STATUS", value: (r) => r.status },
+    ];
+    printTable(rows, cols);
+  });
+}
+
 export function cmdClv(
   file: string,
   flags: CommonFlags,
