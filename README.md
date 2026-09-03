@@ -17,6 +17,8 @@ Set your API key once:
 export PROPLINE_API_KEY=your_key_here
 ```
 
+Paid plans: Hobby $9/mo (5,000 req/day, full analytics), Pro $19/mo (25,000/day + CSV exports), Streaming Lite $39/mo (250,000/day + webhooks/websocket), Streaming $79/mo (1,000,000/day), Enterprise (unlimited).
+
 Or pass `--api-key` per-invocation. Get a free key at <https://prop-line.com/?ref=cli>.
 
 ## Quick examples
