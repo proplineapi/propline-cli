@@ -38,7 +38,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.33.1";
+export const VERSION = "0.33.2";
 
 const program = new Command();
 
@@ -374,7 +374,10 @@ program
   .command("sgp")
   .argument("<sport>", "sport key")
   .argument("<event_id>", "event id")
-  .argument("<file>", 'JSON file of legs (market, name, description, point, period), or "-" for stdin')
+  .argument(
+    "<file>",
+    'JSON file of legs (market, name, description, point, period, team for a team total, or book_outcome_id), or "-" for stdin',
+  )
   .option("-B, --bookmaker <key>", "book to price at: fanduel, betonlineag or lowvig", "fanduel")
   .description("Price a same-game parlay at the book's own correlated odds (Hobby+)")
   .action(function (this: Command, sport: string, eventId: string, file: string) {
