@@ -38,7 +38,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.33.2";
+export const VERSION = "0.33.3";
 
 const program = new Command();
 

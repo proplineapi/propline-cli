@@ -1,6 +1,6 @@
 {
   "name": "propline-cli",
-  "version": "0.33.2",
+  "version": "0.33.3",
   "description": "Command-line interface for the PropLine player props betting odds API. Wraps the propline SDK with pretty-printed tables and JSON output.",
   "keywords": [
     "cli",
