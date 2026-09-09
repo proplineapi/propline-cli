@@ -1427,6 +1427,48 @@ export function cmdSgp(
     );
     if (flags.json) return printJson(q);
 
+    if ("quotes" in q) {
+      // bookmaker=all — every book on the same legs, side by side.
+      type SgpOne = Awaited<ReturnType<PropLine["priceSgp"]>>;
+      type SgpAll = {
+        away_team: string; home_team: string; redacted?: boolean;
+        best_bookmaker: string | null;
+        quotes: SgpOne[];
+        errors: { bookmaker_title: string; status: number; error: string | null }[];
+      };
+      const all = q as unknown as SgpAll;
+      process.stdout.write(`${all.away_team} @ ${all.home_team} · all books\n`);
+      if (all.redacted) {
+        process.stdout.write("(free tier — prices redacted; Hobby+ unlocks the quotes)\n");
+      }
+      type BookRow = { book: string; sgp: string; indep: string; corr: string; note: string };
+      const bookRows: BookRow[] = [
+        ...all.quotes.map((x) => ({
+          book: x.bookmaker_title,
+          sgp: x.sgp_price === null || x.sgp_price === undefined ? "" : formatPrice(x.sgp_price),
+          indep:
+            x.independent_price === null || x.independent_price === undefined
+              ? ""
+              : formatPrice(x.independent_price),
+          corr: x.correlation_factor === null || x.correlation_factor === undefined ? "" : `×${x.correlation_factor}`,
+          note: x.bookmaker === all.best_bookmaker ? "best" : x.quoted === false ? "not quoted" : "",
+        })),
+        ...all.errors.map((e) => ({
+          book: e.bookmaker_title, sgp: "", indep: "", corr: "",
+          note: `${e.status} ${e.error ?? "error"}`,
+        })),
+      ];
+      const bookCols: Column<BookRow>[] = [
+        { label: "BOOK", value: (r) => r.book },
+        { label: "SGP", value: (r) => r.sgp, numeric: true },
+        { label: "INDEPENDENT", value: (r) => r.indep, numeric: true },
+        { label: "CORRELATION", value: (r) => r.corr, numeric: true },
+        { label: "", value: (r) => r.note },
+      ];
+      printTable(bookRows, bookCols);
+      return;
+    }
+
     process.stdout.write(
       `${q.away_team} @ ${q.home_team} · ${q.bookmaker_title}\n`,
     );
