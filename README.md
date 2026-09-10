@@ -56,6 +56,10 @@ propline ev baseball_mlb 12345 --plus
 # Pinnacle.
 propline ev baseball_mlb 12345 --plus --bookmakers draftkings,fanduel
 
+# ...with Shin's de-vig instead of multiplicative (corrects the
+# favourite-longshot bias on longshot props like anytime TD)
+propline ev baseball_mlb 12345 --plus --devig shin
+
 # Player prop history (Pro tier)
 propline player-history baseball_mlb "Aaron Judge" --market batter_home_runs
 

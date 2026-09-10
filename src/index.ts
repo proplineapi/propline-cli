@@ -38,7 +38,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.33.4";
+export const VERSION = "0.34.0";
 
 const program = new Command();
 
@@ -281,6 +281,10 @@ program
     "--plus",
     "show only +EV outcomes (filter rows where ev_pct > 0)",
     false,
+  )
+  .option(
+    "--devig <method>",
+    "de-vig method for the fair line: multiplicative (default) or shin (corrects the favourite-longshot bias on longshot props)",
   )
   .description("Cross-book +EV against a sharp no-vig fair line (Pro tier)")
   .action(function (this: Command, sport: string, eventId: string) {
