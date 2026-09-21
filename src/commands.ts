@@ -437,7 +437,7 @@ export function cmdGrandSalami(
     const gs = await client.getMlbGrandSalami({ date: flags.date });
     if (flags.json) return printJson(gs);
     process.stdout.write(
-      `MLB Grand Salami — ${gs.date} (UTC)\n` +
+      `MLB Grand Salami — ${gs.date} (US Eastern)\n` +
         `${gs.games_total} games · ${gs.games_completed} final · ` +
         `${gs.games_in_progress} live · ${gs.games_upcoming} upcoming\n` +
         (gs.actual_total_runs === null
@@ -464,7 +464,7 @@ export function cmdDailyGoalsTotal(
     const dgt = await client.getNhlDailyGoalsTotal({ date: flags.date });
     if (flags.json) return printJson(dgt);
     process.stdout.write(
-      `NHL Daily Goals Total — ${dgt.date} (UTC)\n` +
+      `NHL Daily Goals Total — ${dgt.date} (US Eastern)\n` +
         `${dgt.games_total} games · ${dgt.games_completed} final · ` +
         `${dgt.games_in_progress} live · ${dgt.games_upcoming} upcoming\n` +
         (dgt.actual_total_goals === null
