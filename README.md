@@ -60,6 +60,9 @@ propline ev baseball_mlb 12345 --plus --bookmakers draftkings,fanduel
 # favourite-longshot bias on longshot props like anytime TD)
 propline ev baseball_mlb 12345 --plus --devig shin
 
+# ...anchored on Polymarket, falling back to Pinnacle
+propline ev baseball_mlb 12345 --plus --fair-source polymarket,pinnacle
+
 # Find a player's stable player_id (free)
 propline players baseball_mlb judge
 
@@ -133,7 +136,7 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | `propline best-line <sport> <event_id>` | Cross-book line shopping — best price per (market, player, line) across all comparable books. `--markets` + `--bookmakers` filters (Hobby+) |
 | `propline players <sport> <search>` | Search players by name fragment — stable `player_id` + every spelling the books use (free) |
 | `propline player-history <sport> <player>` | Recent prop history for a player on a market. Accepts a name or `player_id`; `--main-line-only` drops alt-ladder rungs; the MAIN column marks the main line (M) and in-play line moves (*) |
-| `propline player-games <sport> <player>` | Game log — a player's recent games with every raw box-score stat per game, one call instead of one per event. `--opponent BOS` for head-to-head (the limit applies after the filter, so it's the last N *meetings*); `--stat-type` to narrow. Raw-stat archive, so it includes games no book priced (free) |
+| `propline player-games <sport> <player>` | Game log — a player's recent games with every raw box-score stat per game, one call instead of one per event. `--opponent BOS` for head-to-head (the limit applies after the filter, so it's the last N *meetings*); `--stat-type` to narrow. Raw-stat archive, so it includes games no book priced; accepts a `player_id` in place of the name (free) |
 | `propline player-trends <sport> <player>` | Aggregated hit-rate trends per market — L5/L10/L20/L50 over/under splits + current streak. `--market <key>` to filter, `--dfs-odds-type <flavor>` to scope to a PrizePicks flavor (Pro full, Free redacted) |
 | `propline export-resolved-props --sport <key>` | Bulk CSV export of resolved props (Pro) |
 | `propline webhooks list / create / delete / test / deliveries` | Webhook management (Streaming) |

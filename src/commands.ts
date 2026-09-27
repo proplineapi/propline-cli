@@ -632,6 +632,7 @@ export function cmdEv(
     bookmakers?: string;
     plus?: boolean;
     devig?: string;
+    fairSource?: string;
   },
 ): Promise<void> {
   return runCommand(async () => {
@@ -645,6 +646,7 @@ export function cmdEv(
       // still measures DK against Pinnacle.
       bookmakers: flags.bookmakers,
       devig: flags.devig as "multiplicative" | "shin" | undefined,
+      fairSource: flags.fairSource,
     });
     if (flags.json) return printJson(resp);
     type Row = {

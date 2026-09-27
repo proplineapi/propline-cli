@@ -39,7 +39,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.35.0";
+export const VERSION = "0.36.0";
 
 const program = new Command();
 
@@ -287,6 +287,10 @@ program
     "--devig <method>",
     "de-vig method for the fair line: multiplicative (default) or shin (corrects the favourite-longshot bias on longshot props)",
   )
+  .option(
+    "--fair-source <list>",
+    "anchor book(s), tried in order per line: pinnacle, polymarket, kalshi, bovada, smarkets (default order when omitted)",
+  )
   .description("Cross-book +EV against a sharp no-vig fair line (Pro tier)")
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdEv(sport, eventId, gather(this));
@@ -453,7 +457,7 @@ program
 program
   .command("player-games")
   .argument("<sport>", "sport key")
-  .argument("<player>", 'player name (quote if it contains spaces — e.g. "Aaron Judge")')
+  .argument("<player>", 'player name (quote if it contains spaces — e.g. "Aaron Judge") or a player_id (e.g. mlb:592450)')
   .option("-l, --limit <n>", "games to return (1-100, default 20)", (v) =>
     parseInt(v, 10),
   )
