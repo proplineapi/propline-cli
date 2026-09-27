@@ -816,6 +816,32 @@ export function cmdBestLine(
   });
 }
 
+/* ── players (search) ───────────────────────────────────────────────── */
+
+export function cmdPlayers(
+  sport: string,
+  search: string,
+  flags: CommonFlags & { limit?: number },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const resp = await client.searchPlayers(sport, search, {
+      limit: flags.limit,
+    });
+    if (flags.json) return printJson(resp);
+    process.stdout.write(
+      `${resp.sport_key} · "${resp.search}" (${resp.players.length} players)\n`,
+    );
+    type Player = (typeof resp.players)[number];
+    const cols: Column<Player>[] = [
+      { label: "PLAYER_ID", value: (r) => r.player_id },
+      { label: "NAME", value: (r) => r.name },
+      { label: "KNOWN_NAMES", value: (r) => r.known_names.join(", ") },
+    ];
+    printTable(resp.players, cols);
+  });
+}
+
 /* ── player-history ─────────────────────────────────────────────────── */
 
 export function cmdPlayerHistory(
@@ -825,6 +851,7 @@ export function cmdPlayerHistory(
     market: string;
     bookmaker?: string;
     limit?: number;
+    mainLineOnly?: boolean;
   },
 ): Promise<void> {
   return runCommand(async () => {
@@ -833,10 +860,12 @@ export function cmdPlayerHistory(
       market: flags.market,
       bookmaker: flags.bookmaker,
       limit: flags.limit,
+      mainLineOnly: flags.mainLineOnly,
     });
     if (flags.json) return printJson(resp);
+    const pid = resp.player_id ? ` [${resp.player_id}]` : "";
     process.stdout.write(
-      `${resp.player_name} · ${resp.market} (${resp.entries.length} entries)\n`,
+      `${resp.player_name}${pid} · ${resp.market} (${resp.entries.length} entries)\n`,
     );
     type Entry = (typeof resp.entries)[number];
     const cols: Column<Entry>[] = [
@@ -847,6 +876,13 @@ export function cmdPlayerHistory(
         label: "LINE",
         value: (r) => formatPoint(r.line),
         numeric: true,
+      },
+      {
+        // "M" = the book's main line; blank = an alt-ladder rung.
+        // "*" = the book moved this line after the game started.
+        label: "MAIN",
+        value: (r) =>
+          `${r.is_main_line ? "M" : ""}${r.line_moved_in_play ? "*" : ""}`,
       },
       { label: "OVER", value: (r) => formatPrice(r.over_price), numeric: true },
       {

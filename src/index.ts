@@ -20,6 +20,7 @@ import {
   cmdEv,
   cmdProjections,
   cmdBestLine,
+  cmdPlayers,
   cmdPlayerHistory,
   cmdPlayerGames,
   cmdPlayerTrends,
@@ -38,7 +39,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.34.0";
+export const VERSION = "0.35.0";
 
 const program = new Command();
 
@@ -408,12 +409,28 @@ program
     return cmdClosing(sport, eventId, gather(this) as never);
   });
 
+/* ── players (search) ───────────────────────────────────────────────── */
+
+program
+  .command("players")
+  .argument("<sport>", "sport key")
+  .argument("<search>", 'name fragment (e.g. "judge")')
+  .option("-l, --limit <n>", "max players (1-100, default 25)", (v) =>
+    parseInt(v, 10),
+  )
+  .description(
+    "Search players by name — stable player_id + every spelling the books use (free)",
+  )
+  .action(function (this: Command, sport: string, search: string) {
+    return cmdPlayers(sport, search, gather(this) as never);
+  });
+
 /* ── player-history ─────────────────────────────────────────────────── */
 
 program
   .command("player-history")
   .argument("<sport>", "sport key")
-  .argument("<player>", 'player name (quote if it contains spaces — e.g. "Aaron Judge")')
+  .argument("<player>", 'player name or player_id (quote if it contains spaces — e.g. "Aaron Judge" or mlb:592450)')
   .requiredOption(
     "-m, --market <key>",
     "market key (required — e.g. pitcher_strikeouts)",
@@ -421,6 +438,10 @@ program
   .option("-b, --bookmaker <key>", "filter to a single book (e.g. draftkings)")
   .option("-l, --limit <n>", "max entries (1-100, default 20)", (v) =>
     parseInt(v, 10),
+  )
+  .option(
+    "--main-line-only",
+    "only each book's main line (drops alt-ladder rungs)",
   )
   .description("Recent prop history for a player on a market (Pro full, Free redacted)")
   .action(function (this: Command, sport: string, player: string) {
@@ -456,7 +477,7 @@ program
 program
   .command("player-trends")
   .argument("<sport>", "sport key")
-  .argument("<player>", 'player name (quote if it contains spaces — e.g. "Aaron Judge")')
+  .argument("<player>", 'player name or player_id (quote if it contains spaces — e.g. "Aaron Judge" or mlb:592450)')
   .option(
     "-m, --market <key>",
     "filter to a single market key (e.g. batter_total_bases)",

@@ -60,8 +60,12 @@ propline ev baseball_mlb 12345 --plus --bookmakers draftkings,fanduel
 # favourite-longshot bias on longshot props like anytime TD)
 propline ev baseball_mlb 12345 --plus --devig shin
 
-# Player prop history (Pro tier)
+# Find a player's stable player_id (free)
+propline players baseball_mlb judge
+
+# Player prop history (Pro tier) — by name or player_id; --main-line-only drops alt rungs
 propline player-history baseball_mlb "Aaron Judge" --market batter_home_runs
+propline player-history baseball_mlb mlb:592450 --market batter_total_bases --main-line-only
 
 # Aggregated hit-rate trends per market (Pro tier)
 propline player-trends baseball_mlb "Aaron Judge"
@@ -127,7 +131,8 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
 | `propline projections <sport> <event_id>` | Market-implied consensus projection per (market, player) — the line where no-vig P(over) crosses 50%, median across books (Hobby+) |
 | `propline best-line <sport> <event_id>` | Cross-book line shopping — best price per (market, player, line) across all comparable books. `--markets` + `--bookmakers` filters (Hobby+) |
-| `propline player-history <sport> <player>` | Recent prop history for a player on a market |
+| `propline players <sport> <search>` | Search players by name fragment — stable `player_id` + every spelling the books use (free) |
+| `propline player-history <sport> <player>` | Recent prop history for a player on a market. Accepts a name or `player_id`; `--main-line-only` drops alt-ladder rungs; the MAIN column marks the main line (M) and in-play line moves (*) |
 | `propline player-games <sport> <player>` | Game log — a player's recent games with every raw box-score stat per game, one call instead of one per event. `--opponent BOS` for head-to-head (the limit applies after the filter, so it's the last N *meetings*); `--stat-type` to narrow. Raw-stat archive, so it includes games no book priced (free) |
 | `propline player-trends <sport> <player>` | Aggregated hit-rate trends per market — L5/L10/L20/L50 over/under splits + current streak. `--market <key>` to filter, `--dfs-odds-type <flavor>` to scope to a PrizePicks flavor (Pro full, Free redacted) |
 | `propline export-resolved-props --sport <key>` | Bulk CSV export of resolved props (Pro) |
