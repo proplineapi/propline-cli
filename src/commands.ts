@@ -54,6 +54,23 @@ export function cmdEvents(sport: string, flags: CommonFlags): Promise<void> {
   });
 }
 
+/* ── ids (event id crosswalk) ────────────────────────────────────────── */
+
+export function cmdIds(sport: string, flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const events = await client.getEventIds(sport);
+    if (flags.json) return printJson(events);
+    const cols: Column<(typeof events)[number]>[] = [
+      { label: "ID", value: (r) => String(r.id) },
+      { label: "START", value: (r) => formatTime(r.commence_time) },
+      { label: "MATCHUP", value: (r) => `${r.away_team} @ ${r.home_team}` },
+      { label: "BOOKS", value: (r) => String(Object.keys(r.books ?? {}).length), numeric: true },
+    ];
+    printTable(events, cols);
+  });
+}
+
 /* ── odds (bulk and single-event) ───────────────────────────────────── */
 
 export function cmdOdds(

@@ -17,6 +17,7 @@ import {
   cmdDfsPayouts,
   cmdResolutionSummary,
   cmdBookAccuracy,
+  cmdIds,
   cmdLive,
   cmdEv,
   cmdProjections,
@@ -40,7 +41,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.37.0";
+export const VERSION = "0.38.0";
 
 const program = new Command();
 
@@ -110,6 +111,16 @@ program
   .description("List upcoming events for a sport")
   .action(function (this: Command, sport: string) {
     return cmdEvents(sport, gather(this));
+  });
+
+/* ── ids ────────────────────────────────────────────────────────────── */
+
+program
+  .command("ids")
+  .argument("<sport>", "sport key (e.g. baseball_mlb)")
+  .description("Event id crosswalk: ESPN, MLB gamePk and each book's own event id (free)")
+  .action(function (this: Command, sport: string) {
+    return cmdIds(sport, gather(this));
   });
 
 /* ── odds ───────────────────────────────────────────────────────────── */
