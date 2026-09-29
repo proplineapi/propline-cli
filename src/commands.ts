@@ -506,6 +506,40 @@ export function cmdResolutionSummary(
   });
 }
 
+/* ── book-accuracy ───────────────────────────────────────────────────── */
+
+export function cmdBookAccuracy(
+  flags: CommonFlags & { days?: number; sport?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const r = await client.getBookAccuracy({ days: flags.days, sport: flags.sport });
+    if (flags.json) return printJson(r);
+    process.stdout.write(
+      `Sportsbook prop-pricing accuracy — ${r.total_props.toLocaleString()} props, ` +
+        `last ${r.days}d${r.sport ? ` (${r.sport})` : ""}\n` +
+        `skill_bp > 0 = closer to the result than the market average. ` +
+        `A pricing report, not a betting edge.\n\n`,
+    );
+    const rows = [...r.books]
+      .sort((a, b) => b.skill_bp - a.skill_bp)
+      .map((b, i) => ({ ...b, rank: i + 1 }));
+    const cols: Column<(typeof rows)[number]>[] = [
+      { label: "#", value: (b) => String(b.rank), numeric: true },
+      { label: "BOOK", value: (b) => b.title },
+      {
+        label: "SKILL_BP",
+        value: (b) => `${b.skill_bp > 0 ? "+" : ""}${b.skill_bp.toFixed(1)}`,
+        numeric: true,
+      },
+      { label: "VERDICT", value: (b) => b.verdict },
+      { label: "MARGIN%", value: (b) => b.margin_pct.toFixed(2), numeric: true },
+      { label: "PROPS", value: (b) => b.props.toLocaleString(), numeric: true },
+    ];
+    printTable(rows, cols);
+  });
+}
+
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
 
 export function cmdDfsPayouts(

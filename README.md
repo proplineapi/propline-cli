@@ -130,6 +130,7 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | `propline context <sport> <event_id>` | Game conditions a prop settles under — probable pitchers, lineup, home-plate umpire, first-pitch weather (free) |
 | `propline movement <sport> <event_id>` | Line movement + steam detection across books — sharp-money signal (Hobby+) |
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
+| `propline book-accuracy [--days N] [--sport KEY]` | How well each sportsbook prices player props vs the market (free) |
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
 | `propline projections <sport> <event_id>` | Market-implied consensus projection per (market, player) — the line where no-vig P(over) crosses 50%, median across books (Hobby+) |

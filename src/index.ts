@@ -16,6 +16,7 @@ import {
   cmdDailyGoalsTotal,
   cmdDfsPayouts,
   cmdResolutionSummary,
+  cmdBookAccuracy,
   cmdLive,
   cmdEv,
   cmdProjections,
@@ -39,7 +40,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.36.0";
+export const VERSION = "0.37.0";
 
 const program = new Command();
 
@@ -240,6 +241,21 @@ program
   .description("Graded-prop volume + per-sport breakdown (free)")
   .action(function (this: Command) {
     return cmdResolutionSummary(gather(this));
+  });
+
+/* ── book-accuracy ───────────────────────────────────────────────────── */
+
+program
+  .command("book-accuracy")
+  .option(
+    "-d, --days <n>",
+    "look-back window, 7-120 (default 30)",
+    (v) => parseInt(v, 10),
+  )
+  .option("-s, --sport <key>", "limit to one sport key, e.g. baseball_mlb")
+  .description("How well each sportsbook prices player props vs the market (free)")
+  .action(function (this: Command) {
+    return cmdBookAccuracy(gather(this));
   });
 
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
