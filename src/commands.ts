@@ -1206,6 +1206,8 @@ export function cmdWebhooksCreate(
     minPriceChangePct?: number;
     minSteamScore?: number;
     minBooksAgreeing?: number;
+    minEvPct?: number;
+    maxEvPct?: number;
     batchMax?: number;
   },
 ): Promise<void> {
@@ -1213,7 +1215,7 @@ export function cmdWebhooksCreate(
     const client = buildClient(flags);
     const events = flags.events
       ? (flags.events.split(",").map((s) => s.trim()) as Array<
-          "line_movement" | "resolution" | "steam" | "market_suspended"
+          "line_movement" | "resolution" | "steam" | "market_suspended" | "ev"
         >)
       : undefined;
     const hook = await client.createWebhook({
@@ -1227,6 +1229,8 @@ export function cmdWebhooksCreate(
       minPriceChangePct: flags.minPriceChangePct,
       minSteamScore: flags.minSteamScore,
       minBooksAgreeing: flags.minBooksAgreeing,
+      minEvPct: flags.minEvPct,
+      maxEvPct: flags.maxEvPct,
       batchMax: flags.batchMax,
     });
     if (flags.json) return printJson(hook);

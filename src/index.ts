@@ -41,7 +41,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.39.0";
+export const VERSION = "0.40.0";
 
 const program = new Command();
 
@@ -582,7 +582,7 @@ webhooks
   .requiredOption("--url <url>", "HTTPS endpoint that will receive POSTs")
   .option(
     "--events <list>",
-    "comma-separated event types: line_movement,resolution,steam,market_suspended (default: all)",
+    "comma-separated event types: line_movement,resolution,steam,market_suspended,ev (default: all)",
   )
   .option("--sport <key>", "filter to a single sport")
   .option("--market <key>", "filter to a single market key")
@@ -610,6 +610,16 @@ webhooks
     "--min-books-agreeing <n>",
     "market_suspended only: books that must have pulled the same player/market before you hear it (unset = every drop, 3 = late scratches)",
     (v) => parseInt(v, 10),
+  )
+  .option(
+    "--min-ev-pct <n>",
+    "ev events only: minimum EV% (0-100) against the fair line to deliver (default 1)",
+    (v) => parseFloat(v),
+  )
+  .option(
+    "--max-ev-pct <n>",
+    "ev events only: maximum EV% to deliver, drops implausibly large edges (default: no cap)",
+    (v) => parseFloat(v),
   )
   .option(
     "--batch-max <n>",
