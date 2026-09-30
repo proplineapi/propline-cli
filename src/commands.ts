@@ -1208,6 +1208,7 @@ export function cmdWebhooksCreate(
     minBooksAgreeing?: number;
     minEvPct?: number;
     maxEvPct?: number;
+    evFairSource?: string;
     batchMax?: number;
   },
 ): Promise<void> {
@@ -1231,6 +1232,7 @@ export function cmdWebhooksCreate(
       minBooksAgreeing: flags.minBooksAgreeing,
       minEvPct: flags.minEvPct,
       maxEvPct: flags.maxEvPct,
+      evFairSource: flags.evFairSource,
       batchMax: flags.batchMax,
     });
     if (flags.json) return printJson(hook);

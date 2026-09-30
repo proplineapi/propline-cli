@@ -41,7 +41,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.40.0";
+export const VERSION = "0.41.0";
 
 const program = new Command();
 
@@ -620,6 +620,10 @@ webhooks
     "--max-ev-pct <n>",
     "ev events only: maximum EV% to deliver, drops implausibly large edges (default: no cap)",
     (v) => parseFloat(v),
+  )
+  .option(
+    "--ev-fair-source <value>",
+    "ev events only: fair-line anchor, 'consensus' or comma list of pinnacle,polymarket,kalshi,bovada,smarkets (default: the /ev order)",
   )
   .option(
     "--batch-max <n>",
