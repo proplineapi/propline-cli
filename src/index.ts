@@ -41,7 +41,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.38.0";
+export const VERSION = "0.39.0";
 
 const program = new Command();
 
@@ -316,7 +316,11 @@ program
   )
   .option(
     "--fair-source <list>",
-    "anchor book(s), tried in order per line: pinnacle, polymarket, kalshi, bovada, smarkets (default order when omitted)",
+    "anchor book(s), tried in order per line: pinnacle, polymarket, kalshi, bovada, smarkets (default order when omitted); or 'consensus' alone for the median no-vig line across 3+ fresh books (opt-in, not a proven better anchor)",
+  )
+  .option(
+    "--max-age <seconds>",
+    "drop quoted prices the book has not delivered within this many seconds (the fair line is unaffected)",
   )
   .description("Cross-book +EV against a sharp no-vig fair line (Pro tier)")
   .action(function (this: Command, sport: string, eventId: string) {

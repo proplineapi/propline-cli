@@ -684,12 +684,20 @@ export function cmdEv(
     plus?: boolean;
     devig?: string;
     fairSource?: string;
+    maxAge?: string;
   },
 ): Promise<void> {
   return runCommand(async () => {
     const client = buildClient(flags);
     if (flags.devig && flags.devig !== "multiplicative" && flags.devig !== "shin") {
       throw new Error(`--devig must be 'multiplicative' or 'shin' (got '${flags.devig}')`);
+    }
+    let maxAge: number | undefined;
+    if (flags.maxAge !== undefined) {
+      maxAge = Number(flags.maxAge);
+      if (!Number.isInteger(maxAge) || maxAge < 0) {
+        throw new Error(`--max-age must be a whole number of seconds >= 0 (got '${flags.maxAge}')`);
+      }
     }
     const resp = await client.getEventEv(sport, eventId, {
       markets: parseMarketsFlag(flags.markets),
@@ -698,6 +706,7 @@ export function cmdEv(
       bookmakers: flags.bookmakers,
       devig: flags.devig as "multiplicative" | "shin" | undefined,
       fairSource: flags.fairSource,
+      maxAge,
     });
     if (flags.json) return printJson(resp);
     type Row = {
