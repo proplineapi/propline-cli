@@ -123,13 +123,13 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | --- | --- |
 | `propline sports` | List available sports |
 | `propline events <sport>` | List upcoming events for a sport |
-| `propline odds <sport> [event_id]` | Bulk odds (no event_id) or per-event (with). `--period q1` (or `h1`/`p1`/`f5`/…) filters to game-period markets; `--bookmakers draftkings,fanduel` filters to specific books; `--links` adds each book's public event-page URL (Bovada/DK/FanDuel/BetMGM/Kalshi/Polymarket/Smarkets — also on `best-line`). The per-event table has a TYPE column (`main` / `alt` / `N+` milestone rung); `--main-only` hides alternate lines and milestones. |
+| `propline odds <sport> [event_id]` | Bulk odds (no event_id) or per-event (with). `--period q1` (or `h1`/`p1`/`f5`/…) filters to game-period markets; `--bookmakers draftkings,fanduel` filters to specific books; `--links` adds each book's public event-page URL (Bovada/DK/FanDuel/BetMGM/Kalshi/Polymarket/Smarkets/ProphetX/Novig — also on `best-line`). The per-event table has a TYPE column (`main` / `alt` / `N+` milestone rung); `--main-only` hides alternate lines and milestones. |
 | `propline history <sport> <event_id>` | Historical line movement; supports `--from`/`--to`, `--relative-from`/`--relative-to`, `--interval`, `--changes-only`, `--period` (Hobby+) |
 | `propline closing <sport> <event_id>` | Opening **and** closing line per (book, market, outcome) — CLV helper. Table shows OPEN / OPEN PRICE beside LINE / PRICE. `--period` accepted (Hobby+) |
 | `propline clv <file>` | Grade **placed** bets against their closing lines. Takes a JSON array of bets (or `-` for stdin) and prints TOOK / CLOSE / CLV / VS DEVIG / ANCHOR / RESULT per bet plus a portfolio summary (Hobby+) |
 | `propline sgp <sport> <event_id> <file>` | Price a same-game parlay at the **book's own** correlated odds (FanDuel, DraftKings, BetOnline, LowVig — `--bookmaker all` prints every book side by side). Takes a JSON array of legs named as `/odds` names them (or `-` for stdin); prints the SGP price beside the independent product and the correlation factor, then one row per leg with its stored / live price and the book's accept/refuse status. `--bookmaker` (Hobby+) |
 | `propline scores <sport>` | Recent scores + status |
-| `propline futures <sport>` | Season-long futures — championship/division/conference winners, MVP + awards, season win totals across Bovada/FanDuel/DraftKings/Pinnacle (free) |
+| `propline futures <sport>` | Season-long futures — championship/division/conference winners, MVP + awards, season win totals across Bovada/FanDuel/DraftKings/BetMGM/Pinnacle/Kalshi (free) |
 | `propline context <sport> <event_id>` | Game conditions a prop settles under — probable pitchers, lineup, home-plate umpire, first-pitch weather (free) |
 | `propline movement <sport> <event_id>` | Line movement + steam detection across books — sharp-money signal (Hobby+) |
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |

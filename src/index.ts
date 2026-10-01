@@ -41,7 +41,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.42.0";
+export const VERSION = "0.42.1";
 
 const program = new Command();
 
@@ -143,7 +143,7 @@ program
   )
   .option(
     "--links",
-    "include each book's public event-page URL (Bovada/DK/FanDuel/BetMGM/Kalshi/Polymarket/Smarkets)",
+    "include each book's public event-page URL (Bovada/DK/FanDuel/BetMGM/Kalshi/Polymarket/Smarkets/ProphetX/Novig)",
   )
   .option(
     "--book-ids",
