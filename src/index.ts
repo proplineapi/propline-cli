@@ -41,7 +41,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.41.0";
+export const VERSION = "0.42.0";
 
 const program = new Command();
 
@@ -148,6 +148,10 @@ program
   .option(
     "--book-ids",
     "include each book's own ids (book_event_id per book, book_outcome_id per outcome) for joining onto a book's native feed — Kalshi ships its event + per-contract tickers. Best with --json",
+  )
+  .option(
+    "--main-only",
+    "per-event table: show only each book's main line (hide alternate lines and N+ milestone rungs)",
   )
   .description("Get current odds across all books")
   .action(function (this: Command, sport: string, eventId: string | undefined) {

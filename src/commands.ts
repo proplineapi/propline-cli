@@ -82,6 +82,7 @@ export function cmdOdds(
     period?: string;
     links?: boolean;
     bookIds?: boolean;
+    mainOnly?: boolean;
   },
 ): Promise<void> {
   return runCommand(async () => {
@@ -102,7 +103,7 @@ export function cmdOdds(
         includeBookIds,
       });
       if (flags.json) return printJson(resp);
-      printOddsResponse(resp);
+      printOddsResponse(resp, flags.mainOnly === true);
       printEventLinks(resp.bookmakers);
       return;
     }
@@ -164,7 +165,11 @@ interface OddsResponseLike {
       key: string;
       /** Canonical team name on a team total; null on a game market. */
       team?: string | null;
+      /** "main" | "alternate" | "milestone". */
+      line_type?: string | null;
       outcomes?: Array<{
+        /** Per-outcome override (Kalshi / Polymarket US rows). */
+        line_type?: string | null;
         name: string;
         description?: string | null;
         price: number;
@@ -193,7 +198,13 @@ function printEventLinks(
   }
 }
 
-function printOddsResponse(resp: OddsResponseLike): void {
+const LINE_TYPE_LABEL: Record<string, string> = {
+  main: "main",
+  alternate: "alt",
+  milestone: "N+",
+};
+
+function printOddsResponse(resp: OddsResponseLike, mainOnly = false): void {
   // Per-event detail view: one row per (book, market, outcome). Same
   // shape as `propline odds <sport> <event> --json` but flattened so the
   // table reads top-to-bottom by book → market → outcome.
@@ -205,8 +216,10 @@ function printOddsResponse(resp: OddsResponseLike): void {
     point: string;
     price: string;
     mult: string;
+    type: string;
   };
   const rows: Row[] = [];
+  let anyType = false;
   let anyMult = false;
   let anyFrozen = false;
   for (const book of resp.bookmakers ?? []) {
@@ -219,6 +232,11 @@ function printOddsResponse(resp: OddsResponseLike): void {
     if (frozen) anyFrozen = true;
     for (const market of book.markets ?? []) {
       for (const o of market.outcomes ?? []) {
+        // An outcome's own line_type overrides its market's on the books
+        // that put every player on one row (Kalshi / Polymarket US).
+        const lineType = o.line_type ?? market.line_type ?? null;
+        if (mainOnly && lineType && lineType !== "main") continue;
+        if (lineType) anyType = true;
         const m = o.payout_multiplier;
         if (m !== null && m !== undefined) anyMult = true;
         rows.push({
@@ -235,6 +253,7 @@ function printOddsResponse(resp: OddsResponseLike): void {
           point: formatPoint(o.point ?? null),
           price: formatPrice(o.price),
           mult: m !== null && m !== undefined ? `${m}x` : "",
+          type: lineType ? (LINE_TYPE_LABEL[lineType] ?? lineType) : "",
         });
       }
     }
@@ -255,6 +274,8 @@ function printOddsResponse(resp: OddsResponseLike): void {
     { label: "LINE", value: (r) => r.point, numeric: true },
     { label: "PRICE", value: (r) => r.price, numeric: true },
   ];
+  // main / alt / N+ (milestone rung) — from the API's line_type field.
+  if (anyType) cols.push({ label: "TYPE", value: (r) => r.type });
   // DFS boost/discount column — only shown when a book (Underdog) actually
   // returns a multiplier, so standard sportsbook output stays unchanged.
   if (anyMult) {
