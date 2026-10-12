@@ -41,7 +41,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.42.1";
+export const VERSION = "0.43.0";
 
 const program = new Command();
 
@@ -586,7 +586,7 @@ webhooks
   .requiredOption("--url <url>", "HTTPS endpoint that will receive POSTs")
   .option(
     "--events <list>",
-    "comma-separated event types: line_movement,resolution,steam,market_suspended,ev (default: all)",
+    "comma-separated event types: line_movement,resolution,steam,market_suspended,ev,line_added,line_pulled (default: all except line_added/line_pulled, which are opt-in)",
   )
   .option("--sport <key>", "filter to a single sport")
   .option("--market <key>", "filter to a single market key")

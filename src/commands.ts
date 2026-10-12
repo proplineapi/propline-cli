@@ -1237,7 +1237,7 @@ export function cmdWebhooksCreate(
     const client = buildClient(flags);
     const events = flags.events
       ? (flags.events.split(",").map((s) => s.trim()) as Array<
-          "line_movement" | "resolution" | "steam" | "market_suspended" | "ev"
+          "line_movement" | "resolution" | "steam" | "market_suspended" | "ev" | "line_added" | "line_pulled"
         >)
       : undefined;
     const hook = await client.createWebhook({
