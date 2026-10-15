@@ -578,6 +578,42 @@ export function cmdBookAccuracy(
   });
 }
 
+/* ── golf-rounds ─────────────────────────────────────────────────────── */
+
+export function cmdGolfRounds(
+  player: string,
+  flags: CommonFlags & { tour?: string; limit?: number; since?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const r = await client.getGolfRounds(player, {
+      tour: flags.tour,
+      limit: flags.limit,
+      since: flags.since,
+    });
+    if (flags.json) return printJson(r);
+    const fmt = (v: number | null) => (v === null ? "-" : String(v));
+    const s = r.summary;
+    process.stdout.write(
+      `${r.player_name} — ${r.tours.join(", ")}\n` +
+        `L5 ${fmt(s.last_5.avg_strokes)} (${fmt(s.last_5.avg_to_par)})  ` +
+        `L10 ${fmt(s.last_10.avg_strokes)} (${fmt(s.last_10.avg_to_par)})  ` +
+        `L20 ${fmt(s.last_20.avg_strokes)} (${fmt(s.last_20.avg_to_par)})\n\n`,
+    );
+    const cols: Column<(typeof r.rounds)[number]>[] = [
+      { label: "DATE", value: (x) => x.round_date },
+      { label: "TOUR", value: (x) => x.tour },
+      { label: "TOURNAMENT", value: (x) => x.tournament },
+      { label: "RD", value: (x) => String(x.round), numeric: true },
+      { label: "STROKES", value: (x) => String(x.strokes), numeric: true },
+      { label: "TO_PAR", value: (x) => fmt(x.to_par), numeric: true },
+      { label: "BIRDIES", value: (x) => fmt(x.birdies), numeric: true },
+      { label: "BOGEYS", value: (x) => fmt(x.bogeys), numeric: true },
+    ];
+    printTable(r.rounds, cols);
+  });
+}
+
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
 
 export function cmdDfsPayouts(

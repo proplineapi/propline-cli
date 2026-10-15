@@ -135,6 +135,7 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | `propline resolution-summary` | Graded-prop volume + per-sport breakdown (free) |
 | `propline ids <sport>` | Event id crosswalk — ESPN, MLB gamePk and each book's own event id (free) |
 | `propline book-accuracy [--days N] [--sport KEY]` | How well each sportsbook prices player props vs the market (free) |
+| `propline golf-rounds <player> [--tour pga,liv] [--limit N]` | A golfer's completed rounds by tour + L5/L10/L20 averages (free) |
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
 | `propline projections <sport> <event_id>` | Market-implied consensus projection per (market, player) — the line where no-vig P(over) crosses 50%, median across books (Hobby+) |

@@ -17,6 +17,7 @@ import {
   cmdDfsPayouts,
   cmdResolutionSummary,
   cmdBookAccuracy,
+  cmdGolfRounds,
   cmdIds,
   cmdLive,
   cmdEv,
@@ -41,7 +42,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.43.0";
+export const VERSION = "0.44.0";
 
 const program = new Command();
 
@@ -271,6 +272,18 @@ program
   .description("How well each sportsbook prices player props vs the market (free)")
   .action(function (this: Command) {
     return cmdBookAccuracy(gather(this));
+  });
+
+/* ── golf-rounds ─────────────────────────────────────────────────────── */
+
+program
+  .command("golf-rounds <player>")
+  .option("-t, --tour <tours>", "comma-separated: pga, dp_world, liv, lpga, korn_ferry, champions")
+  .option("-n, --limit <n>", "rounds to show, 1-200 (default 20)", (v) => parseInt(v, 10))
+  .option("--since <date>", "only rounds on or after YYYY-MM-DD")
+  .description("A golfer's completed rounds by tour + L5/L10/L20 averages (free)")
+  .action(function (this: Command, player: string) {
+    return cmdGolfRounds(player, gather(this));
   });
 
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
