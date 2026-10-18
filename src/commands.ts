@@ -614,6 +614,57 @@ export function cmdGolfRounds(
   });
 }
 
+/* ── injuries ────────────────────────────────────────────────────────── */
+
+export function cmdInjuries(
+  sport: string,
+  flags: CommonFlags & {
+    team?: string;
+    status?: string;
+    history?: boolean;
+    days?: number;
+    player?: string;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    if (flags.history) {
+      const h = await client.getInjuryHistory(sport, {
+        days: flags.days,
+        player: flags.player,
+      });
+      if (flags.json) return printJson(h);
+      process.stdout.write(
+        `${h.sport} — ${h.count} status changes, last ${h.days} days` +
+          (h.truncated ? " (truncated)" : "") +
+          `\n\n`,
+      );
+      const cols: Column<(typeof h.changes)[number]>[] = [
+        { label: "WHEN", value: (c) => formatTime(c.changed_at) },
+        { label: "PLAYER", value: (c) => c.player_name },
+        { label: "TEAM", value: (c) => c.team ?? "-" },
+        { label: "FROM", value: (c) => c.old_status ?? "-" },
+        { label: "TO", value: (c) => c.new_status ?? "off report" },
+      ];
+      printTable(h.changes, cols);
+      return;
+    }
+    const r = await client.getInjuries(sport, { team: flags.team, status: flags.status });
+    if (flags.json) return printJson(r);
+    process.stdout.write(`${r.sport} — ${r.count} players on the injury report\n\n`);
+    const cols: Column<(typeof r.players)[number]>[] = [
+      { label: "TEAM", value: (p) => p.team_abbr ?? p.team ?? "-" },
+      { label: "PLAYER", value: (p) => p.player_name },
+      { label: "POS", value: (p) => p.position ?? "-" },
+      { label: "STATUS", value: (p) => p.status },
+      { label: "INJURY", value: (p) => [p.side, p.body_part, p.injury_type].filter(Boolean).join(" ") || "-" },
+      { label: "RETURN", value: (p) => p.expected_return ?? "-" },
+      { label: "SINCE", value: (p) => formatTime(p.status_since) },
+    ];
+    printTable(r.players, cols);
+  });
+}
+
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
 
 export function cmdDfsPayouts(

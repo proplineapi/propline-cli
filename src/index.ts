@@ -18,6 +18,7 @@ import {
   cmdResolutionSummary,
   cmdBookAccuracy,
   cmdGolfRounds,
+  cmdInjuries,
   cmdIds,
   cmdLive,
   cmdEv,
@@ -42,7 +43,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.44.0";
+export const VERSION = "0.45.0";
 
 const program = new Command();
 
@@ -284,6 +285,23 @@ program
   .description("A golfer's completed rounds by tour + L5/L10/L20 averages (free)")
   .action(function (this: Command, player: string) {
     return cmdGolfRounds(player, gather(this));
+  });
+
+/* ── injuries ────────────────────────────────────────────────────────── */
+
+program
+  .command("injuries <sport>")
+  .option("-t, --team <team>", "team name or abbreviation, e.g. KC")
+  .option(
+    "-s, --status <codes>",
+    "comma-separated: out, doubtful, questionable, probable, day_to_day, injured_list, suspended, other",
+  )
+  .option("--history", "show status changes instead of the current report")
+  .option("-d, --days <n>", "with --history: 1-90 days (default 7)", (v) => parseInt(v, 10))
+  .option("-p, --player <name>", "with --history: filter by player name")
+  .description("Injury report for NFL, NCAAF, NBA, WNBA, NHL, MLB (free)")
+  .action(function (this: Command, sport: string) {
+    return cmdInjuries(sport, gather(this));
   });
 
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
