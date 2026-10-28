@@ -2007,3 +2007,100 @@ export function cmdSettle(
     printTable(rows, cols);
   });
 }
+
+
+export function cmdIdsLookup(
+  flags: CommonFlags & { book?: string; bookEventId?: string; espn?: string; mlbGamePk?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const res = await client.lookupEventIds({
+      book: flags.book,
+      bookEventId: flags.bookEventId,
+      espnEventId: flags.espn,
+      mlbGamePk: flags.mlbGamePk,
+    });
+    if (flags.json) return printJson(res);
+    const cols: Column<(typeof res.events)[number]>[] = [
+      { label: "QUERY", value: (r) => r.query },
+      { label: "ID", value: (r) => String(r.id) },
+      { label: "SPORT", value: (r) => r.sport_key },
+      { label: "START", value: (r) => formatTime(r.commence_time) },
+      { label: "MATCHUP", value: (r) => `${r.away_team} @ ${r.home_team}` },
+      { label: "STATUS", value: (r) => r.status },
+      {
+        label: "SCORE",
+        value: (r) => (r.home_score === null ? "" : `${r.away_score}-${r.home_score}`),
+        numeric: true,
+      },
+    ];
+    printTable(res.events, cols);
+    if (res.not_found.length) {
+      process.stdout.write(`not found: ${res.not_found.join(", ")}\n`);
+    }
+  });
+}
+
+export function cmdParlay(
+  file: string,
+  flags: CommonFlags & { price?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const raw =
+      file === "-"
+        ? await new Promise<string>((resolve, reject) => {
+            let buf = "";
+            process.stdin.setEncoding("utf8");
+            process.stdin.on("data", (c) => (buf += c));
+            process.stdin.on("end", () => resolve(buf));
+            process.stdin.on("error", reject);
+          })
+        : await readFile(file, "utf8");
+    let legs: unknown;
+    try {
+      legs = JSON.parse(raw);
+    } catch (e) {
+      throw new Error(`Could not parse ${file === "-" ? "stdin" : file} as JSON: ${(e as Error).message}`);
+    }
+    if (!Array.isArray(legs)) throw new Error("Expected a JSON array of legs.");
+
+    const res = await client.priceParlay(legs as never, {
+      price: flags.price !== undefined ? Number(flags.price) : undefined,
+    });
+    if (flags.json) return printJson(res);
+
+    if (res.priced) {
+      process.stdout.write(
+        `fair ${formatPrice(res.fair_price ?? 0)}` +
+          (res.best_legs_price !== null && res.best_legs_price !== undefined
+            ? ` · best legs ${formatPrice(res.best_legs_price)}`
+            : "") +
+          (res.offered_ev_pct !== null && res.offered_ev_pct !== undefined
+            ? ` · offered EV ${res.offered_ev_pct > 0 ? "+" : ""}${res.offered_ev_pct}%`
+            : "") +
+          (res.same_game ? " · same-game legs: fair price assumes independence (see sgp)" : "") +
+          `\n`,
+      );
+    } else {
+      process.stdout.write(`not priced (${res.reason ?? "unmatched leg"})\n`);
+    }
+    type Row = { leg: string; fair: string; best: string; book: string; note: string };
+    const rows: Row[] = res.legs.map((l) => ({
+      leg: `${l.market} ${l.selection}${l.side ? ` ${l.side}` : ""}${
+        l.point !== null && l.point !== undefined ? ` ${l.point}` : ""
+      }`,
+      fair: l.fair_price === null || l.fair_price === undefined ? "" : formatPrice(l.fair_price),
+      best: l.best_price === null || l.best_price === undefined ? "" : formatPrice(l.best_price),
+      book: l.best_book ?? "",
+      note: l.matched ? "" : (l.reason ?? "unmatched"),
+    }));
+    printTable(rows, [
+      { label: "LEG", value: (r) => truncate(r.leg, 40) },
+      { label: "FAIR", value: (r) => r.fair, numeric: true },
+      { label: "BEST", value: (r) => r.best, numeric: true },
+      { label: "BOOK", value: (r) => r.book },
+      { label: "NOTE", value: (r) => r.note },
+    ]);
+  });
+}

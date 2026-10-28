@@ -34,6 +34,8 @@ import {
   cmdClosing,
   cmdClv,
   cmdSettle,
+  cmdIdsLookup,
+  cmdParlay,
   cmdSgp,
   cmdWebhooksList,
   cmdWebhooksCreate,
@@ -44,7 +46,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.46.0";
+export const VERSION = "0.47.0";
 
 const program = new Command();
 
@@ -124,6 +126,17 @@ program
   .description("Event id crosswalk: ESPN, MLB gamePk and each book's own event id (free)")
   .action(function (this: Command, sport: string) {
     return cmdIds(sport, gather(this));
+  });
+
+program
+  .command("ids-lookup")
+  .option("--book <key>", "book whose event id you hold, e.g. pinnacle")
+  .option("--book-event-id <ids>", "that book's event id(s), comma-separated")
+  .option("--espn <ids>", "ESPN event id(s), comma-separated")
+  .option("--mlb-game-pk <ids>", "MLB gamePk(s), comma-separated")
+  .description("Find events (with score) from a book, ESPN or MLB id (free)")
+  .action(function (this: Command) {
+    return cmdIdsLookup(gather(this) as never);
   });
 
 /* ── odds ───────────────────────────────────────────────────────────── */
@@ -452,6 +465,17 @@ program
   .description("Settle placed bets: won / lost / push / void / half results, with payout (Hobby+)")
   .action(function (this: Command, file: string) {
     return cmdSettle(file, gather(this) as never);
+  });
+
+/* ── parlay ─────────────────────────────────────────────────────────── */
+
+program
+  .command("parlay")
+  .argument("<file>", 'JSON array of legs, or "-" for stdin')
+  .option("--price <american>", "parlay price you were offered, for its EV%")
+  .description("Fair price of a parlay across games and each book's price (Hobby+)")
+  .action(function (this: Command, file: string) {
+    return cmdParlay(file, gather(this) as never);
   });
 
 /* ── sgp ────────────────────────────────────────────────────────────── */
