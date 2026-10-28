@@ -33,6 +33,7 @@ import {
   cmdHistory,
   cmdClosing,
   cmdClv,
+  cmdSettle,
   cmdSgp,
   cmdWebhooksList,
   cmdWebhooksCreate,
@@ -43,7 +44,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.45.0";
+export const VERSION = "0.46.0";
 
 const program = new Command();
 
@@ -441,6 +442,16 @@ program
   .description("Grade placed bets against their closing lines — CLV (Hobby+)")
   .action(function (this: Command, file: string) {
     return cmdClv(file, gather(this) as never);
+  });
+
+/* ── settle ─────────────────────────────────────────────────────────── */
+
+program
+  .command("settle")
+  .argument("<file>", 'JSON file of placed bets (singles or parlays with "legs"), or "-" for stdin')
+  .description("Settle placed bets: won / lost / push / void / half results, with payout (Hobby+)")
+  .action(function (this: Command, file: string) {
+    return cmdSettle(file, gather(this) as never);
   });
 
 /* ── sgp ────────────────────────────────────────────────────────────── */

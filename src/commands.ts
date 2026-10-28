@@ -1923,3 +1923,87 @@ function parseMarketsFlag(value: string | undefined): string[] | undefined {
 /** Avoid an unused-import warning while still re-exporting the type
  *  for downstream consumers who want to wire their own subcommands. */
 export type { PropLine };
+
+export function cmdSettle(
+  file: string,
+  flags: CommonFlags,
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+
+    // JSON only, for the same reason as `clv`: a half CSV parser that
+    // splits a quoted name settles the wrong bet without saying so.
+    const raw =
+      file === "-"
+        ? await new Promise<string>((resolve, reject) => {
+            let buf = "";
+            process.stdin.setEncoding("utf8");
+            process.stdin.on("data", (c) => (buf += c));
+            process.stdin.on("end", () => resolve(buf));
+            process.stdin.on("error", reject);
+          })
+        : await readFile(file, "utf8");
+
+    let bets: unknown;
+    try {
+      bets = JSON.parse(raw);
+    } catch (e) {
+      throw new Error(
+        `Could not parse ${file === "-" ? "stdin" : file} as JSON: ${
+          (e as Error).message
+        }`,
+      );
+    }
+    if (!Array.isArray(bets)) {
+      throw new Error("Expected a JSON array of bet objects.");
+    }
+
+    const res = await client.settleBets(bets as never);
+    if (flags.json) return printJson(res);
+
+    const s = res.summary;
+    process.stdout.write(
+      `${s.settled}/${s.bets} settled` +
+        ` · ${s.won} won · ${s.lost} lost · ${s.push_or_void} push/void` +
+        (s.pending ? ` · ${s.pending} pending` : "") +
+        (s.unmatched ? ` · ${s.unmatched} unmatched` : "") +
+        (s.profit !== null && s.profit !== undefined
+          ? ` · profit ${s.profit > 0 ? "+" : ""}${s.profit}`
+          : "") +
+        `\n`,
+    );
+
+    type Row = { ref: string; bet: string; result: string; actual: string; profit: string };
+    const rows: Row[] = (res.bets ?? []).map((b) => {
+      const first = b.legs[0];
+      const bet = b.parlay
+        ? `${b.legs.length}-leg parlay`
+        : first
+          ? `${first.market} ${first.selection}${first.side ? ` ${first.side}` : ""}${
+              first.point !== null && first.point !== undefined ? ` ${first.point}` : ""
+            }`
+          : "";
+      return {
+        ref: b.ref ?? "",
+        bet,
+        result: b.result === "unmatched" ? `unmatched (${b.reason ?? "?"})` : b.result,
+        actual:
+          !b.parlay && first && first.actual_value !== null && first.actual_value !== undefined
+            ? String(first.actual_value)
+            : "",
+        profit:
+          b.profit === null || b.profit === undefined
+            ? ""
+            : `${b.profit > 0 ? "+" : ""}${b.profit}`,
+      };
+    });
+    const cols: Column<Row>[] = [
+      { label: "REF", value: (r) => r.ref },
+      { label: "BET", value: (r) => truncate(r.bet, 40) },
+      { label: "RESULT", value: (r) => r.result },
+      { label: "ACTUAL", value: (r) => r.actual, numeric: true },
+      { label: "PROFIT", value: (r) => r.profit, numeric: true },
+    ];
+    printTable(rows, cols);
+  });
+}
