@@ -730,6 +730,48 @@ export function cmdReferees(
   });
 }
 
+/* ── coverage ─────────────────────────────────────────────────────────── */
+
+export function cmdCoverageMarkets(
+  sport: string,
+  flags: CommonFlags & { days?: number; periods?: boolean; props?: boolean },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const r = await client.getMarketCoverage(sport, {
+      days: flags.days,
+      periods: flags.periods,
+    });
+    if (flags.json) return printJson(r);
+    process.stdout.write(`${r.sport_key} — ${r.events} games in the next ${r.days} days\n\n`);
+    const cols: Column<(typeof r.bookmakers)[number]>[] = [
+      { label: "BOOK", value: (b) => b.key },
+      { label: "GAMES", value: (b) => `${b.events}/${r.events}` },
+      { label: "GAME LINES", value: (b) => String(new Set(b.game_lines.map((e) => e.market)).size), numeric: true },
+      { label: "PROP MARKETS", value: (b) => String(b.prop_market_count), numeric: true },
+    ];
+    printTable(r.bookmakers, cols);
+  });
+}
+
+export function cmdCoverageHistory(sport: string, flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const r = await client.getHistoryCoverage(sport);
+    if (flags.json) return printJson(r);
+    const cols: Column<(typeof r.bookmakers)[number]>[] = [
+      { label: "BOOK", value: (b) => b.key },
+      { label: "HISTORY FROM", value: (b) => b.history_start ?? "-" },
+      { label: "GAME LINES", value: (b) => b.game_lines_start ?? "-" },
+      { label: "PROPS", value: (b) => b.props_start ?? "-" },
+      { label: "LATEST", value: (b) => b.latest_event ?? "-" },
+      { label: "EVENTS", value: (b) => String(b.events), numeric: true },
+      { label: "RETIRED", value: (b) => (b.retired ? "yes" : "") },
+    ];
+    printTable(r.bookmakers, cols);
+  });
+}
+
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
 
 export function cmdDfsPayouts(

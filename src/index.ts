@@ -20,6 +20,8 @@ import {
   cmdGolfRounds,
   cmdInjuries,
   cmdReferees,
+  cmdCoverageMarkets,
+  cmdCoverageHistory,
   cmdIds,
   cmdLive,
   cmdEv,
@@ -47,7 +49,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.48.0";
+export const VERSION = "0.49.0";
 
 const program = new Command();
 
@@ -327,9 +329,29 @@ program
   .option("--since <date>", "only matches on or after YYYY-MM-DD")
   .option("--until <date>", "only matches before YYYY-MM-DD")
   .option("-l, --limit <n>", "with a name: max matches, 1-500 (default 100)", (v) => parseInt(v, 10))
-  .description("Referee card stats, or one referee's matches (soccer_epl, free)")
+  .description("Referee card stats, or one referee's matches (32 soccer leagues, free)")
   .action(function (this: Command, sport: string, name: string | undefined) {
     return cmdReferees(sport, name, gather(this));
+  });
+
+/* ── coverage ─────────────────────────────────────────────────────────── */
+
+const coverage = program.command("coverage").description("Which markets each book prices, and when its history starts (free)");
+
+coverage
+  .command("markets <sport>")
+  .option("-d, --days <n>", "games starting in the next N days, 1-7 (default 3)", (v) => parseInt(v, 10))
+  .option("--periods", "include quarter / half / inning markets")
+  .description("Per book: markets priced on upcoming games, and on how many")
+  .action(function (this: Command, sport: string) {
+    return cmdCoverageMarkets(sport, gather(this));
+  });
+
+coverage
+  .command("history <sport>")
+  .description("Per book: when its odds history starts for a sport")
+  .action(function (this: Command, sport: string) {
+    return cmdCoverageHistory(sport, gather(this));
   });
 
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
