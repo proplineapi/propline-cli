@@ -665,6 +665,71 @@ export function cmdInjuries(
   });
 }
 
+/* ── referees ─────────────────────────────────────────────────────────── */
+
+export function cmdReferees(
+  sport: string,
+  name: string | undefined,
+  flags: CommonFlags & {
+    search?: string;
+    since?: string;
+    until?: string;
+    limit?: number;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const perMatch = (v: number | null) => (v == null ? "-" : v.toFixed(2));
+    if (name) {
+      const r = await client.getRefereeMatches(sport, name, {
+        since: flags.since,
+        until: flags.until,
+        limit: flags.limit,
+      });
+      if (flags.json) return printJson(r);
+      process.stdout.write(
+        `${r.referee} — ${r.matches.length} of ${r.match_count} matches, ` +
+          `${perMatch(r.yellow_cards_per_match)} yellows / ${perMatch(r.red_cards_per_match)} reds per graded match\n\n`,
+      );
+      const cols: Column<(typeof r.matches)[number]>[] = [
+        { label: "DATE", value: (m) => formatTime(m.commence_time) },
+        { label: "MATCH", value: (m) => `${m.home_team} v ${m.away_team}` },
+        {
+          label: "SCORE",
+          value: (m) => (m.home_score == null ? "-" : `${m.home_score}-${m.away_score}`),
+        },
+        { label: "Y (H-A)", value: (m) => (m.yellow_cards == null ? "-" : `${m.yellow_cards} (${m.home_yellow_cards ?? "-"}-${m.away_yellow_cards ?? "-"})`) },
+        { label: "R (H-A)", value: (m) => (m.red_cards == null ? "-" : `${m.red_cards} (${m.home_red_cards ?? "-"}-${m.away_red_cards ?? "-"})`) },
+      ];
+      printTable(r.matches, cols);
+      return;
+    }
+    const r = await client.getReferees(sport, {
+      search: flags.search,
+      since: flags.since,
+      until: flags.until,
+    });
+    if (flags.json) return printJson(r);
+    process.stdout.write(`${r.sport} — ${r.count} referees\n\n`);
+    const cols: Column<(typeof r.referees)[number]>[] = [
+      { label: "REFEREE", value: (x) => x.referee },
+      { label: "MATCHES", value: (x) => String(x.matches) },
+      { label: "Y/MATCH", value: (x) => perMatch(x.yellow_cards_per_match) },
+      { label: "R/MATCH", value: (x) => perMatch(x.red_cards_per_match) },
+      { label: "CARDS/MATCH", value: (x) => perMatch(x.cards_per_match) },
+      { label: "LAST", value: (x) => (x.last_match ? formatTime(x.last_match) : "-") },
+      {
+        label: "NEXT",
+        value: (x) =>
+          x.next_match
+            ? `${formatTime(x.next_match.commence_time)} ${x.next_match.home_team} v ${x.next_match.away_team}`
+            : "-",
+      },
+    ];
+    printTable(r.referees, cols);
+  });
+}
+
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */
 
 export function cmdDfsPayouts(

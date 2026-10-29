@@ -19,6 +19,7 @@ import {
   cmdBookAccuracy,
   cmdGolfRounds,
   cmdInjuries,
+  cmdReferees,
   cmdIds,
   cmdLive,
   cmdEv,
@@ -46,7 +47,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.47.0";
+export const VERSION = "0.48.0";
 
 const program = new Command();
 
@@ -316,6 +317,19 @@ program
   .description("Injury report for NFL, NCAAF, NBA, WNBA, NHL, MLB (free)")
   .action(function (this: Command, sport: string) {
     return cmdInjuries(sport, gather(this));
+  });
+
+/* ── referees ─────────────────────────────────────────────────────────── */
+
+program
+  .command("referees <sport> [name]")
+  .option("--search <text>", "without a name: filter referees by name substring")
+  .option("--since <date>", "only matches on or after YYYY-MM-DD")
+  .option("--until <date>", "only matches before YYYY-MM-DD")
+  .option("-l, --limit <n>", "with a name: max matches, 1-500 (default 100)", (v) => parseInt(v, 10))
+  .description("Referee card stats, or one referee's matches (soccer_epl, free)")
+  .action(function (this: Command, sport: string, name: string | undefined) {
+    return cmdReferees(sport, name, gather(this));
   });
 
 /* ── dfs-payouts ─────────────────────────────────────────────────────── */

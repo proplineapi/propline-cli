@@ -141,6 +141,8 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | `propline golf-rounds <player> [--tour pga,liv] [--limit N]` | A golfer's completed rounds by tour + L5/L10/L20 averages (free) |
 | `propline injuries <sport> [--team KC] [--status out,questionable]` | Current injury report for NFL, NCAAF, NBA, WNBA, NHL, MLB (free) |
 | `propline injuries <sport> --history [--days 7] [--player name]` | Injury status changes over the last 1-90 days (free) |
+| `propline referees <sport> [--search name] [--since YYYY-MM-DD]` | Referee card stats — cards per match, last and next match (soccer_epl, free) |
+| `propline referees <sport> "<name>" [--limit N]` | One referee's matches with each team's cards (soccer_epl, free) |
 | `propline live` | Every in-progress game across the major sports |
 | `propline ev <sport> <event_id>` | Cross-book +EV vs no-vig fair line (Pro) |
 | `propline projections <sport> <event_id>` | Market-implied consensus projection per (market, player) — the line where no-vig P(over) crosses 50%, median across books (Hobby+) |
