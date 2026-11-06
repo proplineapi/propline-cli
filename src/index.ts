@@ -49,7 +49,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.49.0";
+export const VERSION = "0.49.1";
 
 const program = new Command();
 
@@ -688,7 +688,7 @@ webhooks
   .requiredOption("--url <url>", "HTTPS endpoint that will receive POSTs")
   .option(
     "--events <list>",
-    "comma-separated event types: line_movement,resolution,steam,market_suspended,ev,line_added,line_pulled (default: all except line_added/line_pulled, which are opt-in)",
+    "comma-separated event types: line_movement,resolution,steam,market_suspended,ev,line_added,line_pulled,availability,stat_update,play (default: all except line_added/line_pulled, which are opt-in; play = live NBA play-by-play)",
   )
   .option("--sport <key>", "filter to a single sport")
   .option("--market <key>", "filter to a single market key")
