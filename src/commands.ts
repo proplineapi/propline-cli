@@ -1713,6 +1713,81 @@ export function cmdHistory(
   });
 }
 
+/* ── depth-history ──────────────────────────────────────────────────── */
+
+export function cmdDepthHistory(
+  sport: string,
+  eventId: string,
+  flags: CommonFlags & {
+    markets?: string;
+    bookmakers?: string;
+    from?: string;
+    to?: string;
+    interval?: string;
+    period?: string;
+    limit?: number;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const page = await client.getDepthHistory(sport, eventId, {
+      markets: parseMarketsFlag(flags.markets),
+      bookmakers: flags.bookmakers,
+      from: flags.from,
+      to: flags.to,
+      interval: flags.interval as
+        | "30s" | "1m" | "5m" | "15m" | "30m" | "1h" | undefined,
+      period: flags.period,
+      limit: flags.limit,
+    });
+    if (flags.json) return printJson(page);
+    type Row = {
+      book: string; market: string; player: string; side: string;
+      when: string; point: string; price: string; size: string; levels: string;
+    };
+    const rows: Row[] = [];
+    for (const book of page.bookmakers ?? []) {
+      for (const m of book.markets ?? []) {
+        for (const o of m.outcomes ?? []) {
+          for (const s of o.snapshots ?? []) {
+            rows.push({
+              book: book.title ?? book.key,
+              market: m.key,
+              player: o.description ?? "",
+              side: o.name,
+              when: formatTime(s.recorded_at),
+              point: formatPoint(s.point ?? null),
+              price: formatPrice(s.price),
+              size: s.liquidity == null ? "-" : `$${Math.round(s.liquidity)}`,
+              levels: String(s.depth?.length ?? 0),
+            });
+          }
+        }
+      }
+    }
+    if (rows.length === 0) {
+      process.stdout.write(
+        `(no depth history returned — exchanges only, recorded from 2026-11-10)\n`,
+      );
+      return;
+    }
+    printTable(rows, [
+      { label: "BOOK", value: (r) => r.book },
+      { label: "MARKET", value: (r) => r.market },
+      { label: "PLAYER", value: (r) => truncate(r.player, 24) },
+      { label: "SIDE", value: (r) => r.side },
+      { label: "WHEN", value: (r) => r.when },
+      { label: "LINE", value: (r) => r.point, numeric: true },
+      { label: "PRICE", value: (r) => r.price, numeric: true },
+      { label: "SIZE", value: (r) => r.size, numeric: true },
+      { label: "LEVELS", value: (r) => r.levels, numeric: true },
+    ]);
+    if (page.next_from) {
+      process.stdout.write(`\nmore: --from ${page.next_from}\n`);
+    }
+  });
+}
+
 /* ── closing ────────────────────────────────────────────────────────── */
 
 export function cmdSgp(

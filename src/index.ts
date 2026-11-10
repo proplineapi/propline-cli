@@ -34,6 +34,7 @@ import {
   cmdExportResolvedProps,
   cmdExportOddsHistory,
   cmdHistory,
+  cmdDepthHistory,
   cmdClosing,
   cmdClv,
   cmdSettle,
@@ -49,7 +50,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.49.1";
+export const VERSION = "0.50.0";
 
 const program = new Command();
 
@@ -481,6 +482,24 @@ program
   .description("Historical line movement for an event with period filters (Hobby+)")
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdHistory(sport, eventId, gather(this) as never);
+  });
+
+/* ── depth-history ──────────────────────────────────────────────────── */
+
+program
+  .command("depth-history")
+  .argument("<sport>", "sport key")
+  .argument("<event_id>", "event id")
+  .option("-m, --markets <list>", "comma-separated market keys (default h2h,spreads,totals)")
+  .option("-b, --bookmakers <list>", "kalshi,polymarket,polymarket_us,prophetx (default all four)")
+  .option("--from <iso>", "ISO timestamp; states at or after (use the printed --from to page)")
+  .option("--to <iso>", "ISO timestamp; states at or before")
+  .option("--interval <bucket>", "last state per bucket: 30s|1m|5m|15m|30m|1h")
+  .option("-p, --period <codes>", "game-period filter, or 'all'")
+  .option("-l, --limit <n>", "states per page (default 5000, max 20000)", (v) => parseInt(v, 10))
+  .description("Order-book depth history on the exchanges: price, size and levels over time (Hobby+)")
+  .action(function (this: Command, sport: string, eventId: string) {
+    return cmdDepthHistory(sport, eventId, gather(this) as never);
   });
 
 /* ── closing ────────────────────────────────────────────────────────── */
