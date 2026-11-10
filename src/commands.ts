@@ -71,6 +71,22 @@ export function cmdIds(sport: string, flags: CommonFlags): Promise<void> {
   });
 }
 
+export function cmdBetLink(outcomeIds: string, flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const res = await client.getParlayLink(outcomeIds);
+    if (flags.json) return printJson(res);
+    const cols: Column<(typeof res.legs)[number]>[] = [
+      { label: "OUTCOME", value: (r) => r.outcome_id },
+      { label: "MARKET", value: (r) => r.market_key },
+      { label: "SIDE", value: (r) => `${r.description ? r.description + " " : ""}${r.name}${r.point != null ? " " + r.point : ""}` },
+    ];
+    printTable(res.legs, cols);
+    console.log(`\n${res.book_title}: ${res.bet_link}`);
+    console.log(res.note);
+  });
+}
+
 /* ── odds (bulk and single-event) ───────────────────────────────────── */
 
 export function cmdOdds(

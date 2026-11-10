@@ -27,6 +27,7 @@ import {
   cmdEv,
   cmdProjections,
   cmdBestLine,
+  cmdBetLink,
   cmdPlayers,
   cmdPlayerHistory,
   cmdPlayerGames,
@@ -50,7 +51,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.50.0";
+export const VERSION = "0.51.0";
 
 const program = new Command();
 
@@ -447,6 +448,16 @@ program
   )
   .action(function (this: Command, sport: string, eventId: string) {
     return cmdBestLine(sport, eventId, gather(this) as never);
+  });
+
+program
+  .command("bet-link")
+  .argument("<outcome_ids>", "comma-separated PropLine outcome ids, all at one book")
+  .description(
+    "One bet-slip link with several legs (DraftKings, FanDuel or Fanatics). The book may still refuse the combination",
+  )
+  .action(function (this: Command, outcomeIds: string) {
+    return cmdBetLink(outcomeIds, gather(this));
   });
 
 /* ── history ────────────────────────────────────────────────────────── */
