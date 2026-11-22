@@ -43,6 +43,10 @@ import {
   cmdParlay,
   cmdSgp,
   cmdWebhooksList,
+  cmdBetsTrack,
+  cmdBetsList,
+  cmdBetsGet,
+  cmdBetsUntrack,
   cmdWebhooksCreate,
   cmdWebhooksDelete,
   cmdWebhooksTest,
@@ -51,7 +55,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.51.0";
+export const VERSION = "0.52.0";
 
 const program = new Command();
 
@@ -700,6 +704,47 @@ program
   )
   .action(function (this: Command) {
     return cmdExportOddsHistory(gather(this) as never);
+  });
+
+/* ── bets (tracking) ────────────────────────────────────────────────── */
+
+const bets = program
+  .command("bets")
+  .description("Track bets: PropLine settles them when the games grade (Hobby+)");
+
+bets
+  .command("track")
+  .argument("<file>", "JSON file holding an array of bets ('-' for stdin)")
+  .description("Register bets to be settled (and pushed as bet_settled webhooks)")
+  .action(function (this: Command, file: string) {
+    return cmdBetsTrack(file, gather(this));
+  });
+
+bets
+  .command("list")
+  .option("--status <status>", "open | settled | expired")
+  .option("--since <iso>", "only bets settled or regraded at or after this time")
+  .option("-l, --limit <n>", "max bets (default 100, max 500)", (v) => parseInt(v, 10))
+  .option("--before-id <id>", "page backwards from this bet id", (v) => parseInt(v, 10))
+  .description("List tracked bets, newest first")
+  .action(function (this: Command) {
+    return cmdBetsList(gather(this) as never);
+  });
+
+bets
+  .command("get")
+  .argument("<id>", "bet id")
+  .description("Show one tracked bet")
+  .action(function (this: Command, id: string) {
+    return cmdBetsGet(id, gather(this));
+  });
+
+bets
+  .command("untrack")
+  .argument("<id>", "bet id")
+  .description("Stop tracking a bet")
+  .action(function (this: Command, id: string) {
+    return cmdBetsUntrack(id, gather(this));
   });
 
 /* ── webhooks ───────────────────────────────────────────────────────── */

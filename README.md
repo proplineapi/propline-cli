@@ -82,6 +82,12 @@ propline player-trends baseball_mlb "Aaron Judge" --dfs-odds-type goblin
 # Bulk CSV export of resolved props (Pro tier)
 propline export-resolved-props --sport baseball_mlb --since 2026-04-01T00:00:00Z --out mlb-resolved.csv
 
+# Track bets: we settle them when the games grade (Hobby+)
+propline bets track bets.json          # JSON array, same fields as /v1/bets/settle
+propline bets list --status settled
+propline bets get 9012
+propline bets untrack 9012
+
 # Manage webhook subscriptions (Streaming tier)
 propline webhooks list
 propline webhooks create --url https://example.com/hook --events line_movement,resolution --sport baseball_mlb

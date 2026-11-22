@@ -1404,6 +1404,115 @@ export function cmdExportOddsHistory(
   });
 }
 
+/* ── bets (tracking) ────────────────────────────────────────────────── */
+
+type TrackedBetRow = {
+  bet_id: number | null;
+  ref?: string | null;
+  status: string;
+  result?: string | null;
+  reason?: string | null;
+  stake?: number | null;
+  price?: number | null;
+  profit?: number | null;
+  parlay: boolean;
+  legs: { market: string; selection: string; point?: number | null }[];
+  settled_at?: string | null;
+};
+
+function readStdin(): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    let buf = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", (c) => (buf += c));
+    process.stdin.on("end", () => resolve(buf));
+    process.stdin.on("error", reject);
+  });
+}
+
+function printTrackedBets(bets: TrackedBetRow[]): void {
+  const cols: Column<TrackedBetRow>[] = [
+    { label: "ID", value: (r) => (r.bet_id === null ? "" : String(r.bet_id)), numeric: true },
+    { label: "REF", value: (r) => truncate(r.ref ?? "", 20) },
+    { label: "STATUS", value: (r) => r.status },
+    { label: "RESULT", value: (r) => r.result ?? r.reason ?? "" },
+    {
+      label: "BET",
+      value: (r) =>
+        r.parlay
+          ? `${r.legs.length}-leg parlay`
+          : truncate(
+              r.legs[0]
+                ? `${r.legs[0].selection} ${r.legs[0].market} ${formatPoint(r.legs[0].point)}`.trim()
+                : "",
+              44,
+            ),
+    },
+    { label: "PRICE", value: (r) => formatPrice(r.price), numeric: true },
+    { label: "PROFIT", value: (r) => (r.profit == null ? "" : r.profit.toFixed(2)), numeric: true },
+    { label: "SETTLED", value: (r) => formatTime(r.settled_at) },
+  ];
+  printTable(bets, cols);
+}
+
+export function cmdBetsTrack(file: string, flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const raw = file === "-" ? await readStdin() : await readFile(file, "utf8");
+    const bets = JSON.parse(raw);
+    if (!Array.isArray(bets)) throw new Error("the file must hold a JSON array of bets");
+    const res = await client.trackBets(bets);
+    if (flags.json) return printJson(res);
+    printTrackedBets(res.bets as TrackedBetRow[]);
+    process.stdout.write(
+      `open bets: ${res.open_bets} of ${res.open_bet_limit}` +
+        (res.push ? "\n" : " (no webhook push on this plan; use `propline bets list`)\n"),
+    );
+  });
+}
+
+export function cmdBetsList(
+  flags: CommonFlags & { status?: string; since?: string; limit?: number; beforeId?: number },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const res = await client.listTrackedBets({
+      status: flags.status as "open" | "settled" | "expired" | undefined,
+      since: flags.since,
+      limit: flags.limit,
+      beforeId: flags.beforeId,
+    });
+    if (flags.json) return printJson(res);
+    printTrackedBets(res.bets as TrackedBetRow[]);
+    process.stdout.write(`open bets: ${res.open_bets} of ${res.open_bet_limit}\n`);
+  });
+}
+
+function betId(id: string): number {
+  const numeric = Number(id);
+  if (!Number.isFinite(numeric)) throw new Error(`bet id must be numeric: ${id}`);
+  return numeric;
+}
+
+export function cmdBetsGet(id: string, flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const bet = await client.getTrackedBet(betId(id));
+    if (flags.json) return printJson(bet);
+    printTrackedBets([bet as TrackedBetRow]);
+  });
+}
+
+export function cmdBetsUntrack(id: string, flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const numeric = betId(id);
+    await client.untrackBet(numeric);
+    if (flags.json) return printJson({ ok: true, bet_id: numeric });
+    process.stdout.write(`bet ${numeric} is no longer tracked.\n`);
+  });
+}
+
 /* ── webhooks ───────────────────────────────────────────────────────── */
 
 export function cmdWebhooksList(flags: CommonFlags): Promise<void> {
