@@ -60,7 +60,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.54.0";
+export const VERSION = "0.55.0";
 
 const program = new Command();
 
@@ -341,7 +341,7 @@ program
   .option("--history", "show lineup changes instead of the current lineups")
   .option("-d, --days <n>", "with --history: 1-90 days (default 7)", (v) => parseInt(v, 10))
   .option("-p, --player <name>", "with --history: filter by player name")
-  .description("Projected and confirmed NBA starting lineups (free)")
+  .description("Lineups for NBA, NFL and NHL: starters, inactives, scratches (free)")
   .action(function (this: Command, sport: string) {
     return cmdLineups(sport, gather(this));
   });
