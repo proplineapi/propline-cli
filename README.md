@@ -151,6 +151,8 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | `propline book-accuracy [--days N] [--sport KEY]` | How well each sportsbook prices player props vs the market (free) |
 | `propline golf-rounds <player> [--tour pga,liv] [--limit N]` | A golfer's completed rounds by tour + L5/L10/L20 averages (free) |
 | `propline injuries <sport> [--team KC] [--status out,questionable]` | Current injury report for NFL, NCAAF, NBA, WNBA, NHL, MLB (free) |
+| `propline lineups <sport> [--team BOS] [--event id]` | Projected and confirmed NBA starting lineups (free) |
+| `propline lineups <sport> --history [--days 7] [--player name]` | Lineup changes over the last 1-90 days (free) |
 | `propline injuries <sport> --history [--days 7] [--player name]` | Injury status changes over the last 1-90 days (free) |
 | `propline referees <sport> [--search name] [--since YYYY-MM-DD]` | Referee card stats — cards per match, last and next match (32 soccer leagues, free) |
 | `propline referees <sport> "<name>" [--limit N]` | One referee's matches with each team's cards (32 soccer leagues, free) |

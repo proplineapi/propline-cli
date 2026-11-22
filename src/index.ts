@@ -19,6 +19,7 @@ import {
   cmdBookAccuracy,
   cmdGolfRounds,
   cmdInjuries,
+  cmdLineups,
   cmdReferees,
   cmdCoverageMarkets,
   cmdCoverageHistory,
@@ -59,7 +60,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.53.0";
+export const VERSION = "0.54.0";
 
 const program = new Command();
 
@@ -329,6 +330,20 @@ program
   .description("Injury report for NFL, NCAAF, NBA, WNBA, NHL, MLB (free)")
   .action(function (this: Command, sport: string) {
     return cmdInjuries(sport, gather(this));
+  });
+
+/* ── lineups ─────────────────────────────────────────────────────────── */
+
+program
+  .command("lineups <sport>")
+  .option("-t, --team <team>", "team name or abbreviation, e.g. BOS")
+  .option("-e, --event <id>", "only this PropLine event id", (v) => parseInt(v, 10))
+  .option("--history", "show lineup changes instead of the current lineups")
+  .option("-d, --days <n>", "with --history: 1-90 days (default 7)", (v) => parseInt(v, 10))
+  .option("-p, --player <name>", "with --history: filter by player name")
+  .description("Projected and confirmed NBA starting lineups (free)")
+  .action(function (this: Command, sport: string) {
+    return cmdLineups(sport, gather(this));
   });
 
 /* ── referees ─────────────────────────────────────────────────────────── */

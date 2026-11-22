@@ -681,6 +681,65 @@ export function cmdInjuries(
   });
 }
 
+/* ── lineups ─────────────────────────────────────────────────────────── */
+
+export function cmdLineups(
+  sport: string,
+  flags: CommonFlags & {
+    team?: string;
+    event?: number;
+    history?: boolean;
+    days?: number;
+    player?: string;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    if (flags.history) {
+      const h = await client.getLineupHistory(sport, {
+        days: flags.days,
+        player: flags.player,
+        eventId: flags.event,
+      });
+      if (flags.json) return printJson(h);
+      process.stdout.write(
+        `${h.sport} — ${h.count} lineup changes, last ${h.days} days` +
+          (h.truncated ? " (truncated)" : "") +
+          `\n\n`,
+      );
+      const label = (status: string | null, role: string | null) =>
+        [status, role].filter(Boolean).join(" ");
+      const cols: Column<(typeof h.changes)[number]>[] = [
+        { label: "WHEN", value: (c) => formatTime(c.changed_at) },
+        { label: "TEAM", value: (c) => c.team_abbr },
+        { label: "PLAYER", value: (c) => c.player_name },
+        { label: "FROM", value: (c) => label(c.old_status, c.old_role) || "not listed" },
+        { label: "TO", value: (c) => label(c.new_status, c.new_role) || "dropped" },
+      ];
+      printTable(h.changes, cols);
+      return;
+    }
+    const r = await client.getLineups(sport, { team: flags.team, eventId: flags.event });
+    if (flags.json) return printJson(r);
+    process.stdout.write(`${r.sport} — ${r.count} games\n\n`);
+    const rows = r.games.flatMap((g) =>
+      g.teams.flatMap((t) =>
+        t.players.map((p) => ({ event_id: g.event_id, team: t.team_abbr, ...p })),
+      ),
+    );
+    const cols: Column<(typeof rows)[number]>[] = [
+      { label: "EVENT", value: (p) => (p.event_id === null ? "-" : String(p.event_id)) },
+      { label: "TEAM", value: (p) => p.team },
+      { label: "PLAYER", value: (p) => p.player_name },
+      { label: "POS", value: (p) => p.position ?? "-" },
+      { label: "ROLE", value: (p) => p.role },
+      { label: "STATUS", value: (p) => p.status },
+      { label: "SINCE", value: (p) => formatTime(p.since) },
+    ];
+    printTable(rows, cols);
+  });
+}
+
 /* ── referees ─────────────────────────────────────────────────────────── */
 
 export function cmdReferees(
