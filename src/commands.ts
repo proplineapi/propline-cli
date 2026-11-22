@@ -1513,6 +1513,88 @@ export function cmdBetsUntrack(id: string, flags: CommonFlags): Promise<void> {
   });
 }
 
+/* ── verified records ───────────────────────────────────────────────── */
+
+export function cmdRecordShow(
+  handle: string,
+  flags: CommonFlags & { limit?: number },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const rec = await client.getRecord(handle, { limit: flags.limit });
+    if (flags.json) return printJson(rec);
+    const line = (label: string, s: typeof rec.all_time) =>
+      `${label}: ${s.won}-${s.lost}${s.push_or_void ? `-${s.push_or_void}` : ""}` +
+      `  ${s.units_profit > 0 ? "+" : ""}${s.units_profit.toFixed(2)}u` +
+      `  ROI ${s.roi_pct == null ? "n/a" : `${s.roi_pct}%`}\n`;
+    process.stdout.write(`${rec.display_name} (@${rec.handle})\n`);
+    process.stdout.write(line("all time    ", rec.all_time));
+    process.stdout.write(line("last 30 days", rec.last_30_days));
+    process.stdout.write(
+      `pending: ${rec.pending}  not yet started (hidden): ${rec.not_yet_started}\n\n`,
+    );
+    type P = (typeof rec.picks)[number];
+    const cols: Column<P>[] = [
+      { label: "GAME DAY", value: (r) => formatTime(r.starts_at) },
+      {
+        label: "PICK",
+        value: (r) =>
+          r.parlay
+            ? `${r.legs.length}-leg parlay`
+            : truncate(
+                r.legs[0]
+                  ? `${r.legs[0].selection ?? ""} ${r.legs[0].side ?? ""} ${formatPoint(r.legs[0].point)} ${r.legs[0].market ?? ""}`
+                      .replace(/\s+/g, " ")
+                      .trim()
+                  : "",
+                48,
+              ),
+      },
+      { label: "PRICE", value: (r) => (r.parlay ? "" : formatPrice(r.legs[0]?.price)), numeric: true },
+      { label: "UNITS", value: (r) => String(r.stake), numeric: true },
+      { label: "RESULT", value: (r) => r.result },
+      { label: "+/-", value: (r) => (r.profit == null ? "" : r.profit.toFixed(2)), numeric: true },
+    ];
+    printTable(rec.picks, cols);
+  });
+}
+
+export function cmdRecordCreate(
+  flags: CommonFlags & { handle?: string; name?: string; bio?: string },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const prof = await client.createRecord({
+      handle: flags.handle,
+      display_name: flags.name,
+      bio: flags.bio,
+    });
+    if (flags.json) return printJson(prof);
+    process.stdout.write(`${prof.display_name} (@${prof.handle})\n${prof.url}\n`);
+  });
+}
+
+export function cmdRecordMe(flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const prof = await client.getMyRecord();
+    if (flags.json) return printJson(prof);
+    process.stdout.write(`${prof.display_name} (@${prof.handle})\n${prof.url}\n`);
+  });
+}
+
+export function cmdRecordPick(file: string, flags: CommonFlags): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const raw = file === "-" ? await readStdin() : await readFile(file, "utf8");
+    const picks = JSON.parse(raw);
+    if (!Array.isArray(picks)) throw new Error("the file must hold a JSON array of picks");
+    const res = await client.addVerifiedPicks(picks);
+    if (flags.json) return printJson(res);
+    printTrackedBets(res.bets as TrackedBetRow[]);
+  });
+}
+
 /* ── webhooks ───────────────────────────────────────────────────────── */
 
 export function cmdWebhooksList(flags: CommonFlags): Promise<void> {

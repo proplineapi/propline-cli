@@ -47,6 +47,10 @@ import {
   cmdBetsList,
   cmdBetsGet,
   cmdBetsUntrack,
+  cmdRecordShow,
+  cmdRecordCreate,
+  cmdRecordMe,
+  cmdRecordPick,
   cmdWebhooksCreate,
   cmdWebhooksDelete,
   cmdWebhooksTest,
@@ -55,7 +59,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.52.0";
+export const VERSION = "0.53.0";
 
 const program = new Command();
 
@@ -745,6 +749,46 @@ bets
   .description("Stop tracking a bet")
   .action(function (this: Command, id: string) {
     return cmdBetsUntrack(id, gather(this));
+  });
+
+/* ── verified records ───────────────────────────────────────────────── */
+
+const record = program
+  .command("record")
+  .description("Verified records: a public, graded pick history");
+
+record
+  .command("show")
+  .argument("<handle>", "the record's handle")
+  .option("-l, --limit <n>", "picks to show (default 100, max 200)", (v) => parseInt(v, 10))
+  .description("Show a tipster's public verified record")
+  .action(function (this: Command, handle: string) {
+    return cmdRecordShow(handle, gather(this) as never);
+  });
+
+record
+  .command("create")
+  .option("--handle <handle>", "3-30 chars, a-z 0-9 _ - (required the first time, then fixed)")
+  .option("--name <name>", "display name")
+  .option("--bio <text>", "one line, up to 160 characters")
+  .description("Create your record, or edit its name / bio (Hobby+)")
+  .action(function (this: Command) {
+    return cmdRecordCreate(gather(this) as never);
+  });
+
+record
+  .command("me")
+  .description("Show your record profile and link")
+  .action(function (this: Command) {
+    return cmdRecordMe(gather(this));
+  });
+
+record
+  .command("pick")
+  .argument("<file>", "JSON file holding an array of picks ('-' for stdin)")
+  .description("Add verified picks to your record (cannot be undone)")
+  .action(function (this: Command, file: string) {
+    return cmdRecordPick(file, gather(this));
   });
 
 /* ── webhooks ───────────────────────────────────────────────────────── */

@@ -88,6 +88,11 @@ propline bets list --status settled
 propline bets get 9012
 propline bets untrack 9012
 
+# Verified records: a public pick history at prop-line.com/record/<handle>
+propline record show sharp_guy                 # anyone can read a record
+propline record create --handle sharp_guy --name "Sharp Guy"
+propline record pick picks.json                # before the game, at a real book price
+
 # Manage webhook subscriptions (Streaming tier)
 propline webhooks list
 propline webhooks create --url https://example.com/hook --events line_movement,resolution --sport baseball_mlb
