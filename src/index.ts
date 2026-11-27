@@ -20,6 +20,7 @@ import {
   cmdGolfRounds,
   cmdInjuries,
   cmdLineups,
+  cmdSplits,
   cmdReferees,
   cmdCoverageMarkets,
   cmdCoverageHistory,
@@ -60,7 +61,7 @@ import {
   cmdStream,
 } from "./commands.js";
 
-export const VERSION = "0.55.0";
+export const VERSION = "0.56.0";
 
 const program = new Command();
 
@@ -330,6 +331,19 @@ program
   .description("Injury report for NFL, NCAAF, NBA, WNBA, NHL, MLB (free)")
   .action(function (this: Command, sport: string) {
     return cmdInjuries(sport, gather(this));
+  });
+
+/* ── splits ──────────────────────────────────────────────────────────── */
+
+program
+  .command("splits <sport>")
+  .option("--event-id <id>", "only this PropLine event id", (v) => parseInt(v, 10))
+  .option("--dk-event-id <id>", "with --history: DraftKings event id")
+  .option("-m, --market <market>", "moneyline, spread or total")
+  .option("--history", "show split changes for one game (needs --event-id or --dk-event-id)")
+  .description("DraftKings betting splits: DraftKings customers' handle % and bets % per side (free)")
+  .action(function (this: Command, sport: string) {
+    return cmdSplits(sport, gather(this));
   });
 
 /* ── lineups ─────────────────────────────────────────────────────────── */

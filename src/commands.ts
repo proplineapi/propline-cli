@@ -673,11 +673,76 @@ export function cmdInjuries(
       { label: "PLAYER", value: (p) => p.player_name },
       { label: "POS", value: (p) => p.position ?? "-" },
       { label: "STATUS", value: (p) => p.status },
+      { label: "OFFICIAL", value: (p) => p.official_status ?? "-" },
       { label: "INJURY", value: (p) => [p.side, p.body_part, p.injury_type].filter(Boolean).join(" ") || "-" },
       { label: "RETURN", value: (p) => p.expected_return ?? "-" },
       { label: "SINCE", value: (p) => formatTime(p.status_since) },
     ];
     printTable(r.players, cols);
+  });
+}
+
+/* ── splits ──────────────────────────────────────────────────────────── */
+
+export function cmdSplits(
+  sport: string,
+  flags: CommonFlags & {
+    eventId?: number;
+    dkEventId?: string;
+    market?: "moneyline" | "spread" | "total";
+    history?: boolean;
+  },
+): Promise<void> {
+  return runCommand(async () => {
+    const client = buildClient(flags);
+    const pct = (v: number | null) => (v === null || v === undefined ? "-" : `${v}%`);
+    const pt = (v: number | null) => (v === null || v === undefined ? "" : ` ${v > 0 ? "+" : ""}${v}`);
+    const odds = (v: number | null) => (v === null || v === undefined ? "-" : v > 0 ? `+${v}` : String(v));
+    if (flags.history) {
+      if (flags.eventId === undefined && !flags.dkEventId) {
+        throw new Error("--history needs --event-id or --dk-event-id");
+      }
+      const h = await client.getSplitHistory(sport, {
+        eventId: flags.eventId,
+        dkEventId: flags.dkEventId,
+      });
+      if (flags.json) return printJson(h);
+      process.stdout.write(
+        `${h.sport} — ${h.count} DraftKings split changes` +
+          (h.truncated ? " (truncated)" : "") +
+          `\n${h.note}\n\n`,
+      );
+      const cols: Column<(typeof h.changes)[number]>[] = [
+        { label: "WHEN", value: (c) => formatTime(c.changed_at) },
+        { label: "MARKET", value: (c) => c.market },
+        { label: "SELECTION", value: (c) => `${c.selection}${pt(c.point)}` },
+        { label: "PRICE", value: (c) => odds(c.price) },
+        { label: "HANDLE", value: (c) => pct(c.handle_pct) },
+        { label: "BETS", value: (c) => pct(c.bets_pct) },
+      ];
+      printTable(h.changes, cols);
+      return;
+    }
+    const r = await client.getSplits(sport, { eventId: flags.eventId, market: flags.market });
+    if (flags.json) return printJson(r);
+    process.stdout.write(`${r.sport} — ${r.count} games, DraftKings splits\n${r.note}\n\n`);
+    type Row = { game: string; market: string; s: import("propline").SplitSelection };
+    const rows: Row[] = [];
+    for (const g of r.games) {
+      const game = `${g.away_team} @ ${g.home_team}`;
+      for (const [market, sels] of Object.entries(g.markets)) {
+        for (const s of sels ?? []) rows.push({ game, market, s });
+      }
+    }
+    const cols: Column<Row>[] = [
+      { label: "GAME", value: (x) => x.game },
+      { label: "MARKET", value: (x) => x.market },
+      { label: "SELECTION", value: (x) => `${x.s.selection}${pt(x.s.point)}` },
+      { label: "PRICE", value: (x) => odds(x.s.price) },
+      { label: "HANDLE", value: (x) => pct(x.s.handle_pct) },
+      { label: "BETS", value: (x) => pct(x.s.bets_pct) },
+    ];
+    printTable(rows, cols);
   });
 }
 

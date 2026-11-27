@@ -154,6 +154,8 @@ propline player-games baseball_mlb "Aaron Judge" --limit 5 --opponent BOS \
 | `propline lineups <sport> [--team BOS] [--event id]` | Lineups for NBA, NFL and NHL (`basketball_nba`, `football_nfl`, `hockey_nhl`) (free) |
 | `propline lineups <sport> --history [--days 7] [--player name]` | Lineup changes over the last 1-90 days (free) |
 | `propline injuries <sport> --history [--days 7] [--player name]` | Injury status changes over the last 1-90 days (free) |
+| `propline splits <sport> [--event-id id] [--market spread]` | DraftKings betting splits: DraftKings customers' handle % and bets % per side (free) |
+| `propline splits <sport> --history --event-id id` | DraftKings split changes for one game, oldest first (`--dk-event-id` also works) (free) |
 | `propline referees <sport> [--search name] [--since YYYY-MM-DD]` | Referee card stats — cards per match, last and next match (32 soccer leagues, free) |
 | `propline referees <sport> "<name>" [--limit N]` | One referee's matches with each team's cards (32 soccer leagues, free) |
 | `propline coverage markets <sport> [--days N] [--periods]` | Markets each book prices on upcoming games, and on how many (free) |
